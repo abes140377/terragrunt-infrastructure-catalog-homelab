@@ -4,7 +4,6 @@ locals {
 
   s3_backend_prefix                      = local.s3_backend_vars.locals.prefix
 
-  s3_backend_use_lockfile                = local.s3_backend_vars.locals.use_lockfile
   s3_backend_region                      = local.s3_backend_vars.locals.region
   s3_backend_endpoint                    = local.s3_backend_vars.locals.endpoint
   s3_backend_skip_credentials_validation = local.s3_backend_vars.locals.skip_credentials_validation
@@ -12,7 +11,7 @@ locals {
   s3_backend_access_key                  = local.s3_backend_vars.locals.access_key
   s3_backend_secret_key                  = local.s3_backend_vars.locals.secret_key
 
-  proxmox_api_url = "https://${local.provider_vars.locals.proxmox_host}:${local.provider_vars.locals.proxmox_port}/api2/json"
+  proxmox_endpoint = "https://${local.provider_vars.locals.proxmox_host}:${local.provider_vars.locals.proxmox_port}/"
 }
 
 # Configure the remote backend
@@ -23,7 +22,6 @@ remote_state {
     bucket                      = "${local.s3_backend_prefix}-homelab-terragrunt-tfstates"
 
     key                         = "${path_relative_to_include()}/tofu.tfstate"
-    use_lockfile                = local.s3_backend_use_lockfile
     region                      = local.s3_backend_region
     endpoint                    = local.s3_backend_endpoint
     skip_credentials_validation = local.s3_backend_skip_credentials_validation
@@ -38,14 +36,15 @@ remote_state {
   }
 }
 
-# Generate an AWS provider block
+# Generate Proxmox provider block
 generate "provider" {
   path      = "provider.tf"
   if_exists = "overwrite_terragrunt"
   contents  = <<EOF
 provider "proxmox" {
-  pm_api_url = "${local.proxmox_api_url}"
-  pm_tls_insecure = true
+  endpoint = "${local.proxmox_endpoint}"
+  api_token = "${get_env("PROXMOX_API_TOKEN", "")}"
+  insecure = true
 }
 EOF
 }

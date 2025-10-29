@@ -1,7 +1,8 @@
 {
   "permissions": {
     "allow": [
-      "Read(//Users/seba/projects/sflab/src/terragrunt/terragrunt-infrastructure-catalog-homelab/examples/terragrunt/**)"
+      "Read(//Users/seba/projects/sflab/src/terragrunt/terragrunt-infrastructure-catalog-homelab/examples/terragrunt/**)",
+      "Read(//Users/seba/projects/sflab/src/terragrunt/terragrunt-infrastructure-catalog-homelab/modules/proxmox-pool/**)"
     ],
     "deny": [],
     "ask": []

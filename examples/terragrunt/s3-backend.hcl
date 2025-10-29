@@ -1,7 +1,6 @@
 locals {
   prefix  = "examples-terragrunt"
 
-  use_lockfile = true
   region = "eu-central-1"
   endpoint  = "http://minio.home.sflab.io:9000"
   skip_credentials_validation = true

@@ -15,4 +15,4 @@ repos:
     hooks:
       - id: tofu-fmt
       - id: tofu-validate
-      - id: goimports
+      # - id: goimports
