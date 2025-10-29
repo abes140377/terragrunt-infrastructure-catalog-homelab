@@ -1,0 +1,39 @@
+#!/usr/bin/env bash
+
+ROLE_NAME="TerraformProv"
+USER_NAME="terraform-prov@pve"
+
+ssh -i ./keys/ansible_id_ecdsa root@proxmox.home.sflab.io << EOF
+
+pveum role list | grep "$ROLE_NAME" > /dev/null 2>&1
+
+if [ "$?" == "0" ]; then
+  echo "Role $ROLE_NAME already exists."
+else
+  echo "Creating role $ROLE_NAME..."
+
+  pveum role add $ROLE_NAME \
+    -privs "Datastore.AllocateSpace Datastore.AllocateTemplate Datastore.Audit Pool.Allocate Sys.Audit Sys.Console Sys.Modify VM.Allocate VM.Audit VM.Clone VM.Config.CDROM VM.Config.Cloudinit VM.Config.CPU VM.Config.Disk VM.Config.HWType VM.Config.Memory VM.Config.Network VM.Config.Options VM.Migrate VM.PowerMgmt SDN.Use"
+
+  echo "Role $ROLE_NAME created."
+fi
+
+# ===
+
+pveum user list | grep "$USER_NAME" > /dev/null 2>&1
+
+if [ "$?" == "0" ]; then
+  echo "User $USER_NAME already exists."
+else
+  echo "Creating user $USER_NAME..."
+
+  pveum user add "$USER_NAME" --password "$PM_PASS"
+
+  echo "Usser $USER_NAME created."
+fi
+
+# ===
+
+pveum aclmod / -user "$USER_NAME" -role "$ROLE_NAME"
+
+EOF

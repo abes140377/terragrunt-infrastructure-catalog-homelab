@@ -1,0 +1,33 @@
+#!/usr/bin/env bash
+
+MINIO_HOST="minio.home.sflab.io"
+MINIO_PORT="9000"
+
+MINIO_ALIAS="myminio"
+MINIO_BUCKET_NAME="homelab-terragrunt-tfstates"
+
+mc alias set $MINIO_ALIAS "http://${MINIO_HOST}:${MINIO_PORT}" $MINIO_USERNAME $MINIO_PASSWORD
+
+echo ""
+# check if service account already exists
+if mc admin user svcacct list $MINIO_ALIAS $MINIO_USERNAME | grep -q "$MINIO_ACCESS_KEY"; then
+  echo "Service account $MINIO_ACCESS_KEY already exists"
+else
+  echo "Creating service account $MINIO_ACCESS_KEY"
+
+  mc admin user svcacct add $MINIO_ALIAS $MINIO_USERNAME --access-key "$MINIO_ACCESS_KEY" --secret-key "$MINIO_SECRET_KEY"
+fi
+
+# create bucket if not already exists
+if mc ls $MINIO_ALIAS/$MINIO_BUCKET_NAME >/dev/null 2>&1; then
+  echo "Bucket $MINIO_BUCKET_NAME already exists"
+else
+  echo "Creating bucket $MINIO_BUCKET_NAME"
+  mc mb $MINIO_ALIAS/$MINIO_BUCKET_NAME
+fi
+
+mc version enable $MINIO_ALIAS/$MINIO_BUCKET_NAME
+
+echo ""
+echo "Available MinIO Buckets:"
+mc ls $MINIO_ALIAS
