@@ -1,0 +1,9 @@
+{
+  "permissions": {
+    "allow": [
+      "Read(//Users/seba/projects/sflab/src/terragrunt/terragrunt-infrastructure-catalog-homelab/examples/terragrunt/**)"
+    ],
+    "deny": [],
+    "ask": []
+  }
+}

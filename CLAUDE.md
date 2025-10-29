@@ -38,7 +38,7 @@ Units and stacks use Git URLs in their `source` field because they are designed 
 
 **Backend Configuration** (`examples/terragrunt/s3-backend.hcl`):
 - Uses MinIO as S3-compatible backend
-- Requires environment variables: `MINIO_ACCESS_KEY` and `MINIO_SECRET_KEY`
+- Requires environment variables: `AWS_ACCESS_KEY_ID` and `AWS_SECRET_ACCESS_KEY`
 - Endpoint: `http://minio.home.sflab.io:9000`
 
 **Provider Configuration** (`examples/terragrunt/provider.hcl`):
@@ -51,8 +51,8 @@ Units and stacks use Git URLs in their `source` field because they are designed 
 
 ```bash
 # Set MinIO credentials (required for Terragrunt backend)
-export MINIO_ACCESS_KEY="your-access-key"
-export MINIO_SECRET_KEY="your-secret-key"
+export AWS_ACCESS_KEY_ID="your-access-key"
+export AWS_SECRET_ACCESS_KEY="your-secret-key"
 
 # Set Proxmox credentials (required for Proxmox provider)
 export PM_API_TOKEN_ID="user@pam!token-id"

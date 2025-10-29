@@ -1,6 +1,18 @@
 repos:
-  - repo: https://github.com/gruntwork-io/pre-commit
-    rev:  v0.1.28
+  - repo: https://github.com/gitleaks/gitleaks
+    rev: v8.24.2
     hooks:
-      - id: terraform-fmt
+      - id: gitleaks
+
+  - repo: https://github.com/pre-commit/pre-commit-hooks
+    rev: v6.0.0
+    hooks:
+      - id: end-of-file-fixer
+      - id: trailing-whitespace
+
+  - repo: https://github.com/gruntwork-io/pre-commit
+    rev: v0.1.30
+    hooks:
+      - id: tofu-fmt
+      - id: tofu-validate
       - id: goimports

@@ -4,18 +4,18 @@ MINIO_HOST="minio.home.sflab.io"
 MINIO_PORT="9000"
 
 MINIO_ALIAS="myminio"
-MINIO_BUCKET_NAME="homelab-terragrunt-tfstates"
+MINIO_BUCKET_NAME="examples-terragrunt-homelab-terragrunt-tfstates"
 
 mc alias set $MINIO_ALIAS "http://${MINIO_HOST}:${MINIO_PORT}" $MINIO_USERNAME $MINIO_PASSWORD
 
 echo ""
 # check if service account already exists
-if mc admin user svcacct list $MINIO_ALIAS $MINIO_USERNAME | grep -q "$MINIO_ACCESS_KEY"; then
-  echo "Service account $MINIO_ACCESS_KEY already exists"
+if mc admin user svcacct list $MINIO_ALIAS $MINIO_USERNAME | grep -q "$AWS_ACCESS_KEY_ID"; then
+  echo "Service account $AWS_ACCESS_KEY_ID already exists"
 else
-  echo "Creating service account $MINIO_ACCESS_KEY"
+  echo "Creating service account $AWS_ACCESS_KEY_ID"
 
-  mc admin user svcacct add $MINIO_ALIAS $MINIO_USERNAME --access-key "$MINIO_ACCESS_KEY" --secret-key "$MINIO_SECRET_KEY"
+  mc admin user svcacct add $MINIO_ALIAS $MINIO_USERNAME --access-key "$AWS_ACCESS_KEY_ID" --secret-key "$AWS_SECRET_ACCESS_KEY"
 fi
 
 # create bucket if not already exists
