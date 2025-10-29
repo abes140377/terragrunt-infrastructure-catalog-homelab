@@ -23,5 +23,5 @@ enter = [
   #
   'mise i -q',
   #
-  'pre-commit install'
+  'pre-commit install -f --hook-type pre-commit'
 ]
