@@ -16,6 +16,10 @@ Managed via mise (mise.toml):
 
 Run `mise install` to install all required tools.
 
+**Note**: When you `cd` into the project directory, mise will automatically:
+- Install all required tools if not present
+- Install pre-commit hooks for code quality checks
+
 ### Key Architecture Concepts
 
 **Three-Layer Architecture:**
@@ -27,6 +31,7 @@ Run `mise install` to install all required tools.
 
 2. **Units** (`units/`): Terragrunt wrappers around modules
    - Each unit references a module via Git URL (for external consumption)
+   - Units use `values` pattern for parameterization (e.g., `values.hostname`)
    - Units define how modules are configured and can declare dependencies
    - Example: `units/proxmox-lxc/terragrunt.hcl` wraps `modules/proxmox-lxc`
 
@@ -132,6 +137,9 @@ tofu validate
 
 # Clean up Terragrunt and Terraform cache files
 mise run terragrunt:cleanup
+
+# Run pre-commit hooks manually
+pre-commit run --all-files
 ```
 
 ## Development Guidelines
@@ -150,8 +158,10 @@ mise run terragrunt:cleanup
 2. Create `terragrunt.hcl` with:
    - `include "root"` block pointing to `root.hcl`
    - `terraform.source` pointing to Git URL (or relative path for examples)
-   - `inputs` block mapping unit inputs to module variables
-3. Add example in `examples/terragrunt/units/`
+   - `inputs` block using `values.*` pattern for parameterization
+3. Add example in `examples/terragrunt/units/` with:
+   - Local relative path to module (e.g., `../../../.././/modules/proxmox-lxc`)
+   - Direct `inputs` block with concrete values or dependency outputs
 
 ### Adding New Stacks
 
@@ -163,7 +173,7 @@ mise run terragrunt:cleanup
 
 ### Working with Dependencies
 
-Units can declare dependencies on other units using the `dependency` block:
+Units in `examples/` can declare dependencies on other units using the `dependency` block:
 
 ```hcl
 dependency "proxmox_pool" {
@@ -175,9 +185,13 @@ dependency "proxmox_pool" {
 }
 
 inputs = {
-  poolid = dependency.proxmox_pool.outputs.poolid
+  hostname = "example-container"
+  poolid   = dependency.proxmox_pool.outputs.poolid
+  password = var.password
 }
 ```
+
+**Note**: Standalone units in `units/` use the `values` pattern instead of direct inputs.
 
 ## Important Notes
 
@@ -205,13 +219,19 @@ These are regenerated on each run and should not be committed to version control
 ### Proxmox Resources
 
 Current modules support:
-- **LXC Containers**: Ubuntu 24.04 standard template on `pve1` node
+- **LXC Containers** (`modules/proxmox-lxc`): Ubuntu 24.04 standard template on `pve1` node
   - Resource: `proxmox_virtual_environment_container`
+  - Required inputs: `hostname` (string), `password` (string, sensitive)
+  - Optional inputs: `poolid` (string, default: "")
   - Network interface: `veth0` on `vmbr0` bridge with DHCP
   - Disk: 8GB on `local-lvm` datastore
   - Unprivileged containers by default
-- **Resource Pools**: For organizing Proxmox resources
+  - Outputs: `ipv4` (container IP address)
+- **Resource Pools** (`modules/proxmox-pool`): For organizing Proxmox resources
   - Resource: `proxmox_virtual_environment_pool`
+  - Required inputs: `poolid` (string)
+  - Optional inputs: `description` (string, default: "")
+  - Outputs: `poolid` (pool identifier)
 
 ### Provider Migration Notes
 
@@ -229,3 +249,32 @@ This repository uses the **bpg/proxmox** provider (version >= 0.69.0), not the o
 - Attributes wrapped in nested blocks: `initialization`, `disk`, `network_interface`, `operating_system`
 - Network interface name: `veth0` (was `eth0`)
 - IP config: `initialization.ip_config.ipv4.address = "dhcp"`
+- Password now required as variable (was previously hardcoded)
+
+## Code Quality
+
+### Pre-commit Hooks
+
+The repository uses pre-commit hooks to maintain code quality:
+- **gitleaks**: Detects hardcoded secrets and credentials
+- **fix end of files**: Ensures files end with a newline
+- **trim trailing whitespace**: Removes trailing whitespace
+- **OpenTofu fmt**: Formats all .tf files
+- **OpenTofu validate**: Validates Terraform module syntax and configuration
+
+Hooks run automatically on commit. To run manually:
+```bash
+pre-commit run --all-files
+```
+
+### Environment Variables
+
+Sensitive credentials are stored in `.creds.env.yaml` (SOPS-encrypted):
+- `MINIO_USERNAME`, `MINIO_PASSWORD`: MinIO admin credentials
+- `AWS_ACCESS_KEY_ID`, `AWS_SECRET_ACCESS_KEY`: MinIO service account for Terragrunt backend
+- `PROXMOX_VE_API_TOKEN`: Proxmox API token for bpg/proxmox provider
+
+To edit encrypted secrets:
+```bash
+mise run secrets:edit
+```
