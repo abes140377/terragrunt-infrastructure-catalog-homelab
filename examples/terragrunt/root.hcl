@@ -42,9 +42,12 @@ generate "provider" {
   if_exists = "overwrite_terragrunt"
   contents  = <<EOF
 provider "proxmox" {
-  endpoint = "${local.proxmox_endpoint}"
-  api_token = "${get_env("PROXMOX_API_TOKEN", "")}"
-  insecure = true
+  endpoint  = "${local.proxmox_endpoint}"
+  insecure  = true
+
+  ssh {
+    agent = true
+  }
 }
 EOF
 }

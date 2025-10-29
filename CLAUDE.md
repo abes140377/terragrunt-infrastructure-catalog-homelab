@@ -6,6 +6,16 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 
 This is a Terragrunt infrastructure catalog for homelab Proxmox environments. It provides reusable infrastructure components (modules, units, and stacks) for managing Proxmox resources using OpenTofu/Terraform and Terragrunt.
 
+### Tool Versions
+
+Managed via mise (mise.toml):
+- **Go**: 1.24.2
+- **OpenTofu**: 1.9.0
+- **Terragrunt**: 0.78.0
+- **MinIO Client (mc)**: latest
+
+Run `mise install` to install all required tools.
+
 ### Key Architecture Concepts
 
 **Three-Layer Architecture:**
@@ -42,8 +52,10 @@ Units and stacks use Git URLs in their `source` field because they are designed 
 - Endpoint: `http://minio.home.sflab.io:9000`
 
 **Provider Configuration** (`examples/terragrunt/provider.hcl`):
-- Configures Proxmox provider
+- Configures bpg/proxmox provider (>= 0.69.0)
 - Default host: `proxmox.home.sflab.io:8006`
+- Uses `PROXMOX_VE_API_TOKEN` environment variable for authentication
+- SSH agent support enabled for advanced operations
 
 ## Common Commands
 
@@ -54,9 +66,9 @@ Units and stacks use Git URLs in their `source` field because they are designed 
 export AWS_ACCESS_KEY_ID="your-access-key"
 export AWS_SECRET_ACCESS_KEY="your-secret-key"
 
-# Set Proxmox credentials (required for Proxmox provider)
-export PM_API_TOKEN_ID="user@pam!token-id"
-export PM_API_TOKEN_SECRET="token-secret"
+# Set Proxmox credentials (required for bpg/proxmox provider)
+# Format: username@realm!tokenname=secret
+export PROXMOX_VE_API_TOKEN="root@pam!tofu=xxxxxxxx-xxxx-xxxx-xxxx-xxxxxxxxxxxx"
 ```
 
 ### Mise Tasks
@@ -65,11 +77,17 @@ export PM_API_TOKEN_SECRET="token-secret"
 # Setup MinIO bucket and service account
 mise run minio:setup
 
+# Setup Proxmox resources
+mise run proxmox:setup
+
 # Install Python dependencies
 mise run install-deps
 
 # Edit SOPS-encrypted secrets
 mise run secrets:edit
+
+# Clean up Terragrunt cache files
+mise run terragrunt:cleanup
 ```
 
 ### Terragrunt Operations
@@ -90,28 +108,30 @@ terragrunt apply
 # Destroy resources
 terragrunt destroy
 
-# Working with stacks
-cd examples/terragrunt/stacks/proxmox-container
+# Working with stacks (from repository root)
+cd stacks/proxmox-container
 
-# Run commands on all units in stack
-terragrunt run-all plan
-terragrunt run-all apply
-terragrunt run-all destroy
+# View stack configuration
+terragrunt render
+
+# Deploy stack (not yet implemented in examples)
+# terragrunt run-all plan
+# terragrunt run-all apply
 ```
 
 ### Development Commands
 
 ```bash
-# Clean up Terragrunt cache files
-./scripts/terragrunt-cleanup
-
-# Format all Terraform files
-terraform fmt -recursive
+# Format all Terraform/OpenTofu files
+tofu fmt -recursive
 
 # Validate Terraform modules
 cd modules/proxmox-lxc
-terraform init
-terraform validate
+tofu init
+tofu validate
+
+# Clean up Terragrunt and Terraform cache files
+mise run terragrunt:cleanup
 ```
 
 ## Development Guidelines
@@ -186,6 +206,26 @@ These are regenerated on each run and should not be committed to version control
 
 Current modules support:
 - **LXC Containers**: Ubuntu 24.04 standard template on `pve1` node
+  - Resource: `proxmox_virtual_environment_container`
+  - Network interface: `veth0` on `vmbr0` bridge with DHCP
+  - Disk: 8GB on `local-lvm` datastore
+  - Unprivileged containers by default
 - **Resource Pools**: For organizing Proxmox resources
-- Default network: DHCP on `vmbr0` bridge
-- Default storage: `local-lvm` with 8G rootfs
+  - Resource: `proxmox_virtual_environment_pool`
+
+### Provider Migration Notes
+
+This repository uses the **bpg/proxmox** provider (version >= 0.69.0), not the older telmate/proxmox provider. Key differences:
+
+**Resource Names:**
+- LXC: `proxmox_virtual_environment_container` (was `proxmox_lxc`)
+- Pool: `proxmox_virtual_environment_pool` (was `proxmox_pool`)
+
+**Authentication:**
+- Environment variable: `PROXMOX_VE_API_TOKEN` (was `PM_API_TOKEN_ID` + `PM_API_TOKEN_SECRET`)
+- Token format: `username@realm!tokenname=secret` (single string)
+
+**LXC Container Configuration:**
+- Attributes wrapped in nested blocks: `initialization`, `disk`, `network_interface`, `operating_system`
+- Network interface name: `veth0` (was `eth0`)
+- IP config: `initialization.ip_config.ipv4.address = "dhcp"`

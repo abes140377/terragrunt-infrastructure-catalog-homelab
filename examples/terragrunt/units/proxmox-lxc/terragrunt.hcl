@@ -24,4 +24,5 @@ dependency "proxmox_pool" {
 inputs = {
   hostname = "example-terragrunt-units-proxmox-lxc"
   poolid   = dependency.proxmox_pool.outputs.poolid
+  password = var.password
 }

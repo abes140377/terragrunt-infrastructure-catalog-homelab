@@ -1,20 +1,34 @@
-resource "proxmox_lxc" "this" {
-  target_node  = "pve1"
-  hostname     = var.hostname
-  ostemplate   = "local:vztmpl/ubuntu-24.04-standard_24.04-2_amd64.tar.zst"
-  password     = "password"
+resource "proxmox_virtual_environment_container" "this" {
+  node_name    = "pve1"
   unprivileged = true
-  pool         = var.poolid
+  pool_id      = var.poolid != "" ? var.poolid : null
 
-  // Terraform will crash without rootfs defined
-  rootfs {
-    storage = "local-lvm"
-    size    = "8G"
+  initialization {
+    hostname = var.hostname
+
+    ip_config {
+      ipv4 {
+        address = "dhcp"
+      }
+    }
+
+    user_account {
+      password = var.password
+    }
   }
 
-  network {
-    name   = "eth0"
+  network_interface {
+    name   = "veth0"
     bridge = "vmbr0"
-    ip     = "dhcp"
+  }
+
+  disk {
+    datastore_id = "local-lvm"
+    size         = 8
+  }
+
+  operating_system {
+    template_file_id = "local:vztmpl/ubuntu-24.04-standard_24.04-2_amd64.tar.zst"
+    type             = "ubuntu"
   }
 }
