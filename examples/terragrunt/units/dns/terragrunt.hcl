@@ -2,6 +2,23 @@ include "root" {
   path = find_in_parent_folders("root.hcl")
 }
 
+# Generate DNS provider block with TSIG configuration
+generate "provider" {
+  path      = "provider.tf"
+  if_exists = "overwrite_terragrunt"
+  contents  = <<EOF
+provider "dns" {
+  update {
+    server        = "192.168.1.13"
+    port          = 5353
+    key_name      = "ddnskey."
+    key_algorithm = "hmac-sha512"
+    key_secret    = "${get_env("TF_VAR_dns_key_secret", "mock-secret-for-testing")}"
+  }
+}
+EOF
+}
+
 terraform {
   // This double-slash allows the module to leverage relative paths to other modules in this repository.
   //
@@ -11,22 +28,6 @@ terraform {
   // source = "git::git@github.com:abes140377/terragrunt-infrastructure-catalog-homelab.git//modules/dns"
 
   source = "../../../.././/modules/dns"
-
-  extra_arguments "dns_credentials" {
-    commands = [
-      "apply",
-      "plan",
-      "destroy",
-    ]
-
-    arguments = [
-      "-var", "dns_server=192.168.1.13",
-      "-var", "dns_port=5353",
-      "-var", "key_name=ddnskey.",
-      "-var", "key_algorithm=hmac-sha512",
-      "-var", "key_secret=${get_env("TF_VAR_dns_key_secret", "mock-secret-for-testing")}",
-    ]
-  }
 }
 
 inputs = {
