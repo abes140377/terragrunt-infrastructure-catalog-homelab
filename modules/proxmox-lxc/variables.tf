@@ -9,7 +9,7 @@ variable "password" {
   sensitive   = true
 }
 
-variable "poolid" {
+variable "pool_id" {
   description = "The ID of the Proxmox pool to which the LXC container will be assigned."
   type        = string
   default     = ""

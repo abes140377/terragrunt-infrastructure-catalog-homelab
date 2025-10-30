@@ -19,5 +19,5 @@ inputs = {
   password = values.password
 
   # Optional inputs
-  poolid = try(values.poolid, "")
+  pool_id = try(values.pool_id, "")
 }

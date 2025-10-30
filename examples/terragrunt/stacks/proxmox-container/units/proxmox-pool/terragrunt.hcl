@@ -28,5 +28,5 @@ terraform {
 }
 
 inputs = {
-  poolid = values.poolid
+  pool_id = values.pool_id
 }

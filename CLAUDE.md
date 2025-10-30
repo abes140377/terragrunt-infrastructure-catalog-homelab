@@ -233,13 +233,13 @@ dependency "proxmox_pool" {
   config_path = "../proxmox-pool"
 
   mock_outputs = {
-    poolid = "mock-pool"
+    pool_id = "mock-pool"
   }
 }
 
 inputs = {
   hostname = "example-container"
-  poolid   = dependency.proxmox_pool.outputs.poolid
+  pool_id  = dependency.proxmox_pool.outputs.pool_id
 }
 ```
 
@@ -252,7 +252,7 @@ Stacks allow you to deploy multiple units together as a coordinated group. Here'
 ```hcl
 # stacks/proxmox-container/terragrunt.stack.hcl
 locals {
-  poolid   = values.poolid
+  pool_id  = values.pool_id
   hostname = values.hostname
   password = values.password
 }
@@ -262,7 +262,7 @@ unit "proxmox_pool" {
   path   = "proxmox-pool"  # REQUIRED: deployment path within .terragrunt-stack
 
   values = {
-    poolid = local.poolid
+    pool_id = local.pool_id
   }
 }
 
@@ -273,7 +273,7 @@ unit "proxmox_lxc" {
   values = {
     hostname        = local.hostname
     password        = local.password
-    poolid          = local.poolid
+    pool_id         = local.pool_id
     pool_unit_path  = "../proxmox-pool"
   }
 }
@@ -391,16 +391,16 @@ Current modules support:
 - **LXC Containers** (`modules/proxmox-lxc`): Ubuntu 24.04 standard template on `pve1` node
   - Resource: `proxmox_virtual_environment_container`
   - Required inputs: `hostname` (string), `password` (string, sensitive)
-  - Optional inputs: `poolid` (string, default: "")
+  - Optional inputs: `pool_id` (string, default: "")
   - Network interface: `veth0` on `vmbr0` bridge with DHCP
   - Disk: 8GB on `local-lvm` datastore
   - Unprivileged containers by default
   - Outputs: `ipv4` (container IP address)
 - **Resource Pools** (`modules/proxmox-pool`): For organizing Proxmox resources
   - Resource: `proxmox_virtual_environment_pool`
-  - Required inputs: `poolid` (string)
+  - Required inputs: `pool_id` (string)
   - Optional inputs: `description` (string, default: "")
-  - Outputs: `poolid` (pool identifier)
+  - Outputs: `pool_id` (pool identifier)
 
 **DNS Resources:**
 - **DNS A Records** (`modules/dns`): Manages DNS A records on BIND9 servers via RFC 2136 dynamic updates

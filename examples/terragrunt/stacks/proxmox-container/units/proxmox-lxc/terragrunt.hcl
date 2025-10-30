@@ -43,12 +43,12 @@ dependency "proxmox_pool" {
   config_path = try(values.pool_unit_path, "../proxmox-pool")
 
   mock_outputs = {
-    poolid = "mock-pool"
+    pool_id = "mock-pool"
   }
-  skip_outputs = try(values.poolid != "", false)
+  skip_outputs = try(values.pool_id != "", false)
 }
 
 inputs = {
   hostname = values.hostname
-  poolid   = try(values.poolid, dependency.proxmox_pool.outputs.poolid)
+  pool_id  = try(values.pool_id, dependency.proxmox_pool.outputs.pool_id)
 }

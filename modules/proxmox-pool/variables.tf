@@ -1,4 +1,4 @@
-variable "poolid" {
+variable "pool_id" {
   description = "The ID of the Proxmox pool."
   type        = string
 }

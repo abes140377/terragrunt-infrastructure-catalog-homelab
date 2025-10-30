@@ -15,7 +15,7 @@ terraform {
 
 inputs = {
   # Required inputs
-  poolid = values.poolid
+  pool_id = values.pool_id
 
   # Optional inputs
   # billing_mode = try(values.billing_mode, "PAY_PER_REQUEST")

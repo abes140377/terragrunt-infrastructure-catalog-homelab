@@ -1,5 +1,5 @@
 locals {
-  poolid   = "example-pool"
+  pool_id  = "example-pool"
   hostname = "example-stack-container"
   password = "SecurePassword123!"
 }
@@ -11,7 +11,7 @@ unit "proxmox_pool" {
   path   = "proxmox-pool"
 
   values = {
-    poolid = local.poolid
+    pool_id = local.pool_id
   }
 }
 
@@ -24,7 +24,7 @@ unit "proxmox_lxc" {
   values = {
     hostname        = local.hostname
     password        = local.password
-    poolid          = local.poolid
+    pool_id         = local.pool_id
     pool_unit_path  = "../proxmox-pool"
   }
 }

@@ -5,7 +5,8 @@
       "Bash(test:*)",
       "Bash(cat:*)",
       "Bash(openspec show:*)",
-      "Bash(openspec list:*)"
+      "Bash(openspec list:*)",
+      "Bash(terragrunt init:*)"
     ],
     "deny": [],
     "ask": []

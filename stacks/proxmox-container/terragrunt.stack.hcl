@@ -1,5 +1,5 @@
 locals {
-  poolid = values.poolid != "" ? values.poolid : ""
+  pool_id = values.pool_id != "" ? values.pool_id : ""
   hostname = values.hostname
   password = values.password
 }
@@ -16,7 +16,7 @@ unit "proxmox_pool" {
   path   = "proxmox-pool"
 
   values = {
-    poolid = values.poolid
+    pool_id = values.pool_id
   }
 }
 
@@ -34,7 +34,7 @@ unit "proxmox_lxc" {
   values = {
     hostname        = values.hostname
     password        = values.password
-    poolid          = values.poolid
+    pool_id         = values.pool_id
     pool_unit_path  = "../proxmox-pool"
   }
 }
