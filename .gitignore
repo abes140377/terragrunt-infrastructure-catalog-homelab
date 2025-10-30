@@ -40,6 +40,9 @@ override.tf.json
 terraform.rc
 
 ### Terragrunt ###
+# Generated .terragrunt-stack directories
+**/.terragrunt-stack
+
 # terragrunt cache directories
 **/.terragrunt-cache/*
 

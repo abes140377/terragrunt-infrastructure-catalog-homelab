@@ -58,7 +58,14 @@ Run `mise install` to install all required tools.
 3. **Stacks** (`stacks/`): Compositions of multiple units
    - Define multiple units that work together
    - Use `terragrunt.stack.hcl` files
+   - Each unit must specify a `path` attribute for deployment location
    - Example: `stacks/proxmox-container/` combines proxmox-pool and proxmox-lxc units
+
+**Examples Directory:**
+The `examples/terragrunt/` directory contains working examples for local testing:
+- `examples/terragrunt/units/`: Individual unit examples with relative module paths
+- `examples/terragrunt/stacks/`: Complete stack examples with local unit wrappers
+- Examples use relative paths (e.g., `../../../.././/modules/proxmox-lxc`) instead of Git URLs
 
 **Git URL Pattern:**
 Units and stacks use Git URLs in their `source` field because they are designed to be consumed as shallow directories by external users who won't have access to the full repository. The examples use relative paths (`../../../.././/modules/proxmox-lxc`) for local development.
@@ -136,15 +143,20 @@ terragrunt apply
 # Destroy resources
 terragrunt destroy
 
-# Working with stacks (from repository root)
-cd stacks/proxmox-container
+# Working with stacks
+cd examples/terragrunt/stacks/proxmox-container
 
-# View stack configuration
-terragrunt render
+# Generate stack (creates .terragrunt-stack directory)
+terragrunt stack generate
 
-# Deploy stack (not yet implemented in examples)
-# terragrunt run-all plan
-# terragrunt run-all apply
+# Plan changes for entire stack
+terragrunt stack run plan
+
+# Apply changes for entire stack
+terragrunt stack run apply
+
+# Destroy stack resources
+terragrunt stack run destroy
 ```
 
 ### Development Commands
@@ -191,8 +203,13 @@ pre-commit run --all-files
 1. Create stack directory in `stacks/`
 2. Create `terragrunt.stack.hcl` with:
    - Multiple `unit` blocks referencing units via Git URLs
+   - Each `unit` block **must** include a `path` attribute (deployment path within `.terragrunt-stack`)
    - `values` blocks to pass inputs between units
-   - Use `dependency` pattern in unit definitions if needed
+   - Dependencies are handled via `values` pattern, not `dependency` blocks
+3. Create example stack in `examples/terragrunt/stacks/` with:
+   - Local unit wrappers in `units/` subdirectory for testing
+   - Direct references to modules via relative paths
+   - Concrete values in `locals` block
 
 ### Working with Dependencies
 
@@ -227,6 +244,47 @@ inputs = {
 ```
 
 **Note**: Standalone units in `units/` use the `values` pattern instead of direct inputs.
+
+### Working with Stacks
+
+Stacks allow you to deploy multiple units together as a coordinated group. Here's an example stack structure:
+
+```hcl
+# stacks/proxmox-container/terragrunt.stack.hcl
+locals {
+  poolid   = values.poolid
+  hostname = values.hostname
+  password = values.password
+}
+
+unit "proxmox_pool" {
+  source = "git::git@github.com:abes140377/terragrunt-infrastructure-catalog-homelab.git//units/proxmox-pool?ref=${values.version}"
+  path   = "proxmox-pool"  # REQUIRED: deployment path within .terragrunt-stack
+
+  values = {
+    poolid = local.poolid
+  }
+}
+
+unit "proxmox_lxc" {
+  source = "git::git@github.com:abes140377/terragrunt-infrastructure-catalog-homelab.git//units/proxmox-lxc?ref=${values.version}"
+  path   = "proxmox-lxc"  # REQUIRED: deployment path within .terragrunt-stack
+
+  values = {
+    hostname = local.hostname
+    password = local.password
+    poolid   = local.poolid  # Pass poolid directly, not via dependency
+  }
+}
+```
+
+**Important Stack Requirements:**
+1. Each `unit` block **must** have a `path` attribute
+2. Dependencies between units are handled by passing values, not using `dependency` blocks
+3. Use `terragrunt stack run <command>` to operate on the entire stack
+4. Stack generates units into `.terragrunt-stack/` directory (gitignored)
+
+For local testing, create example stacks in `examples/terragrunt/stacks/` with local unit wrappers that use relative paths to modules.
 
 ### Passing Variables to Modules
 
@@ -309,11 +367,13 @@ Current modules support:
     - `zone` (string): DNS zone name (e.g., "home.sflab.io.")
     - `name` (string): Record name within the zone
     - `addresses` (list(string)): List of IPv4 addresses
-    - `dns_server` (string): DNS server address and port (e.g., "192.168.1.13:53")
+    - `dns_server` (string): DNS server IPv4 address (e.g., "192.168.1.13")
     - `key_name` (string): TSIG key name for authentication
     - `key_algorithm` (string): TSIG key algorithm (e.g., "hmac-sha256")
     - `key_secret` (string, sensitive): TSIG key secret
-  - Optional inputs: `ttl` (number, default: 300)
+  - Optional inputs:
+    - `ttl` (number, default: 300)
+    - `dns_port` (number, default: 53)
   - Outputs: `fqdn` (fully qualified domain name), `addresses` (IP addresses)
   - Authentication: Uses TSIG (Transaction Signature) for secure dynamic DNS updates
 

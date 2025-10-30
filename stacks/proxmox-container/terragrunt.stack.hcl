@@ -1,6 +1,7 @@
 locals {
   poolid = values.poolid != "" ? values.poolid : ""
-  name = values.name
+  hostname = values.hostname
+  password = values.password
 }
 
 unit "proxmox_pool" {
@@ -12,6 +13,7 @@ unit "proxmox_pool" {
   // Assume that a user consuming this stack will exclusively have access
   // to the directory this file is in, and nothing else in this repository.
   source = "git::git@github.com:abes140377/terragrunt-infrastructure-catalog-homelab.git//units/proxmox-pool?ref=${values.version}"
+  path   = "proxmox-pool"
 
   values = {
     poolid = values.poolid
@@ -27,8 +29,12 @@ unit "proxmox_lxc" {
   // Assume that a user consuming this stack will exclusively have access
   // to the directory this file is in, and nothing else in this repository.
   source = "git::git@github.com:abes140377/terragrunt-infrastructure-catalog-homelab.git//units/proxmox-lxc?ref=${values.version}"
+  path   = "proxmox-lxc"
 
   values = {
-    name = values.name
+    hostname        = values.hostname
+    password        = values.password
+    poolid          = values.poolid
+    pool_unit_path  = "../proxmox-pool"
   }
 }

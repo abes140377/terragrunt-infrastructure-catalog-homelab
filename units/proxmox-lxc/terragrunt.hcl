@@ -16,7 +16,8 @@ terraform {
 inputs = {
   # Required inputs
   hostname = values.hostname
+  password = values.password
 
   # Optional inputs
-  # billing_mode = try(values.billing_mode, "PAY_PER_REQUEST")
+  poolid = try(values.poolid, "")
 }
