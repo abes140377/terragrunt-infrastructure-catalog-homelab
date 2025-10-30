@@ -4,7 +4,8 @@
       "Bash(mise tasks:*)",
       "Bash(test:*)",
       "Bash(cat:*)",
-      "Bash(openspec show:*)"
+      "Bash(openspec show:*)",
+      "Bash(openspec list:*)"
     ],
     "deny": [],
     "ask": []

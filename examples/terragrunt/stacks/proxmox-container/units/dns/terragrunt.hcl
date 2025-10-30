@@ -26,32 +26,20 @@ EOF
 }
 
 terraform {
-  // NOTE: Take note that this source here uses a Git URL instead of a local path.
-  //
-  // This is because units and stacks are generated
-  // as shallow directories when consumed.
-  //
-  // Assume that a user consuming this unit will exclusively have access
-  // to the directory this file is in, and nothing else in this repository.
-  source = "git::git@github.com:abes140377/terragrunt-infrastructure-catalog-homelab.git//modules/dns?ref=${values.version}"
+  source = "../../../../../.././/modules/dns"
 }
 
 dependency "proxmox_lxc" {
-  config_path = try(values.lxc_unit_path, "")
+  config_path = try(values.lxc_unit_path, "../proxmox-lxc")
 
   mock_outputs = {
     ipv4 = "192.168.1.100"
   }
-
-  skip_outputs = try(values.lxc_unit_path, "") == ""
 }
 
 inputs = {
-  # Required inputs
   zone      = values.zone
   name      = values.name
-  addresses = try([dependency.proxmox_lxc.outputs.ipv4], values.addresses, [])
-
-  # Optional inputs
-  ttl = try(values.ttl, 300)
+  addresses = [dependency.proxmox_lxc.outputs.ipv4]
+  ttl       = try(values.ttl, 300)
 }
