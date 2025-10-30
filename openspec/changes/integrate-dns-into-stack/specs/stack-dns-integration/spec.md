@@ -2,11 +2,11 @@
 
 ### Requirement: DNS Unit Integration in Proxmox Container Stack
 
-The `proxmox-container` stack SHALL integrate the DNS unit to automatically register LXC container IP addresses in DNS after container creation.
+The `homelab-proxmox-container` stack SHALL integrate the DNS unit to automatically register LXC container IP addresses in DNS after container creation.
 
 #### Scenario: Production stack DNS unit configuration
 
-- **WHEN** the production stack at `stacks/proxmox-container/terragrunt.stack.hcl` is defined
+- **WHEN** the production stack at `stacks/homelab-proxmox-container/terragrunt.stack.hcl` is defined
 - **THEN** it SHALL include a DNS unit with Git URL source `git::git@github.com:abes140377/terragrunt-infrastructure-catalog-homelab.git//units/dns?ref=${values.version}`
 - **AND** the DNS unit SHALL have a `path` attribute set to `dns`
 - **AND** the DNS unit SHALL receive values for: zone, name, addresses, dns_server, key_name, key_algorithm, key_secret
@@ -54,7 +54,7 @@ The example stack SHALL provide a testable implementation of DNS integration wit
 #### Scenario: DNS unit wrapper creation
 
 - **WHEN** the example stack is created
-- **THEN** it SHALL include a DNS unit wrapper at `examples/terragrunt/stacks/proxmox-container/units/dns/`
+- **THEN** it SHALL include a DNS unit wrapper at `examples/terragrunt/stacks/homelab-proxmox-container/units/dns/`
 - **AND** the wrapper SHALL contain a `terragrunt.hcl` file
 - **AND** the wrapper SHALL use relative module path `../../../../../.././/modules/dns`
 
@@ -74,7 +74,7 @@ The example stack SHALL provide a testable implementation of DNS integration wit
 
 #### Scenario: Example stack DNS unit configuration
 
-- **WHEN** the example stack at `examples/terragrunt/stacks/proxmox-container/terragrunt.stack.hcl` is defined
+- **WHEN** the example stack at `examples/terragrunt/stacks/homelab-proxmox-container/terragrunt.stack.hcl` is defined
 - **THEN** it SHALL include a DNS unit with local source path `./units/dns`
 - **AND** the DNS unit SHALL have a `path` attribute set to `dns`
 - **AND** the DNS unit SHALL use `local.*` references for values (e.g., `local.hostname`)
@@ -94,7 +94,7 @@ The CLAUDE.md documentation SHALL provide comprehensive guidance for using DNS i
 #### Scenario: DNS stack integration examples
 
 - **WHEN** documentation describes stack usage
-- **THEN** it SHALL include an example of the proxmox-container stack with DNS integration
+- **THEN** it SHALL include an example of the homelab-proxmox-container stack with DNS integration
 - **AND** show both production stack configuration (Git URLs) and example stack configuration (local paths)
 - **AND** explain the difference between production and example stack patterns
 

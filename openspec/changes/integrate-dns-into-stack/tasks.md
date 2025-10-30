@@ -1,6 +1,6 @@
 ## 1. Production Stack Integration
 
-- [x] 1.1 Add DNS unit to `stacks/proxmox-container/terragrunt.stack.hcl`
+- [x] 1.1 Add DNS unit to `stacks/homelab-proxmox-container/terragrunt.stack.hcl`
 - [x] 1.2 Configure DNS unit with Git URL source referencing `units/dns`
 - [x] 1.3 Set correct `path` attribute for DNS unit deployment location
 - [x] 1.4 Pass required values to DNS unit (zone, name, addresses, dns_server, key_name, key_algorithm, key_secret)
@@ -10,11 +10,11 @@
 
 ## 2. Example Stack Integration
 
-- [x] 2.1 Create unit wrapper directory `examples/terragrunt/stacks/proxmox-container/units/dns/`
+- [x] 2.1 Create unit wrapper directory `examples/terragrunt/stacks/homelab-proxmox-container/units/dns/`
 - [x] 2.2 Create `terragrunt.hcl` in DNS unit wrapper with relative module path
 - [x] 2.3 Add DNS provider generation block to DNS unit wrapper
 - [x] 2.4 Configure `extra_arguments` for passing `dns_key_secret` via environment variable
-- [x] 2.5 Add DNS unit to `examples/terragrunt/stacks/proxmox-container/terragrunt.stack.hcl`
+- [x] 2.5 Add DNS unit to `examples/terragrunt/stacks/homelab-proxmox-container/terragrunt.stack.hcl`
 - [x] 2.6 Configure DNS unit with local source path (`./units/dns`)
 - [x] 2.7 Pass required values to DNS unit using `local.*` references
 - [x] 2.8 Use dependency block in DNS unit wrapper to get LXC container IP output

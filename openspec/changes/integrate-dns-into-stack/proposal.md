@@ -4,7 +4,7 @@ The Proxmox container stack currently creates LXC containers with DHCP-assigned 
 
 ## What Changes
 
-- Integrate the DNS unit into the `proxmox-container` stack (both production and example stacks)
+- Integrate the DNS unit into the `homelab-proxmox-container` stack (both production and example stacks)
 - Configure the DNS unit to automatically register the LXC container's IP address after container creation
 - Ensure proper dependency ordering so DNS registration happens after the container is created
 - Use the existing `home.sflab.io.` DNS zone for container name resolution
@@ -15,7 +15,7 @@ The Proxmox container stack currently creates LXC containers with DHCP-assigned 
 
 - **Affected specs:** `stack-dns-integration` (NEW)
 - **Affected code:**
-  - `stacks/proxmox-container/terragrunt.stack.hcl` - Add DNS unit to production stack
-  - `examples/terragrunt/stacks/proxmox-container/terragrunt.stack.hcl` - Add DNS unit to example stack
-  - `examples/terragrunt/stacks/proxmox-container/units/dns/` - Create unit wrapper for testing
+  - `stacks/homelab-proxmox-container/terragrunt.stack.hcl` - Add DNS unit to production stack
+  - `examples/terragrunt/stacks/homelab-proxmox-container/terragrunt.stack.hcl` - Add DNS unit to example stack
+  - `examples/terragrunt/stacks/homelab-proxmox-container/units/dns/` - Create unit wrapper for testing
   - `CLAUDE.md` - Update documentation with DNS stack integration examples

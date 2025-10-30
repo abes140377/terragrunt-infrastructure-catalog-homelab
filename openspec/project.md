@@ -44,7 +44,7 @@ This is a Terragrunt infrastructure catalog for homelab Proxmox environments. It
 3. **Stacks** (`stacks/`): Compositions of multiple units
    - Use `terragrunt.stack.hcl` files
    - Combine multiple units that work together
-   - Example: `proxmox-container` combines `proxmox-pool` and `proxmox-lxc`
+   - Example: `homelab-proxmox-container` combines `proxmox-pool` and `proxmox-lxc`
 
 **Configuration Hierarchy:**
 - **Root Configuration** (`examples/terragrunt/root.hcl`): Shared locals for S3 backend and provider configuration

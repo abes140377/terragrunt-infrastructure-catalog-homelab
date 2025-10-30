@@ -66,7 +66,7 @@ Run `mise install` to install all required tools.
    - Define multiple units that work together
    - Use `terragrunt.stack.hcl` files
    - Each unit must specify a `path` attribute for deployment location
-   - Example: `stacks/proxmox-container/` combines proxmox-pool, proxmox-lxc, and dns units
+   - Example: `stacks/homelab-proxmox-container/` combines proxmox-pool, proxmox-lxc, and dns units
 
 **Examples Directory:**
 The `examples/terragrunt/` directory contains working examples for local testing:
@@ -155,7 +155,7 @@ terragrunt apply
 terragrunt destroy
 
 # Working with stacks
-cd examples/terragrunt/stacks/proxmox-container
+cd examples/terragrunt/stacks/homelab-proxmox-container
 
 # Generate stack (creates .terragrunt-stack directory)
 terragrunt stack generate
@@ -261,7 +261,7 @@ inputs = {
 Stacks allow you to deploy multiple units together as a coordinated group. Here's an example stack structure with DNS integration:
 
 ```hcl
-# stacks/proxmox-container/terragrunt.stack.hcl
+# stacks/homelab-proxmox-container/terragrunt.stack.hcl
 locals {
   pool_id  = values.pool_id
   hostname = values.hostname
@@ -331,7 +331,7 @@ export PROXMOX_VE_API_TOKEN="root@pam!tofu=xxxxxxxx"
 export TF_VAR_dns_key_secret="your-tsig-key-secret"
 
 # Navigate to stack directory
-cd examples/terragrunt/stacks/proxmox-container
+cd examples/terragrunt/stacks/homelab-proxmox-container
 
 # Generate and deploy stack
 terragrunt stack generate

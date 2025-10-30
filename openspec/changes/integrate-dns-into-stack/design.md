@@ -1,6 +1,6 @@
 ## Context
 
-The Terragrunt infrastructure catalog uses a three-layer architecture: modules, units, and stacks. The DNS module and unit have been created but are not yet integrated into any stacks. This change adds DNS capability to the `proxmox-container` stack, which currently creates an LXC container in a Proxmox resource pool.
+The Terragrunt infrastructure catalog uses a three-layer architecture: modules, units, and stacks. The DNS module and unit have been created but are not yet integrated into any stacks. This change adds DNS capability to the `homelab-proxmox-container` stack, which currently creates an LXC container in a Proxmox resource pool.
 
 Key constraints:
 - Production stacks use Git URLs and cannot use Terragrunt `dependency` blocks across units (values pattern required)
@@ -14,14 +14,14 @@ Key constraints:
 - Automatically register LXC container IP addresses in DNS when stack is deployed
 - Ensure DNS unit executes after container creation (proper ordering)
 - Provide testable example stack with local unit wrappers
-- Maintain consistency with existing stack patterns (proxmox-container architecture)
+- Maintain consistency with existing stack patterns (homelab-proxmox-container architecture)
 - Use environment variable for DNS credentials (TF_VAR_dns_key_secret)
 
 **Non-Goals:**
 - Support for multiple DNS zones in a single stack (use fixed `home.sflab.io.` zone)
 - Dynamic DNS server selection (use fixed `192.168.1.13:53`)
 - DNS record deletion before container destruction (left for future enhancement)
-- Integration into other stacks beyond proxmox-container
+- Integration into other stacks beyond homelab-proxmox-container
 
 ## Decisions
 
@@ -33,7 +33,7 @@ Key constraints:
 - Production stacks use Git URLs where units are isolated shallow directories
 - Dependency blocks require relative paths between units which don't exist in shallow clones
 - Values pattern is the documented approach for cross-unit data flow in production stacks
-- Consistent with existing proxmox-container stack pattern (poolid passed via values)
+- Consistent with existing homelab-proxmox-container stack pattern (poolid passed via values)
 
 **Alternatives considered:**
 - Use dependency blocks in production stack: Not feasible due to Git URL isolation
@@ -96,7 +96,7 @@ Key constraints:
 ## Architecture Diagram
 
 ```
-Stack: proxmox-container
+Stack: homelab-proxmox-container
 ├── Unit: proxmox_pool
 │   └── Creates resource pool
 ├── Unit: proxmox_lxc
@@ -119,7 +119,7 @@ Stack: proxmox-container
 ### Production Stack Structure
 
 ```hcl
-# stacks/proxmox-container/terragrunt.stack.hcl
+# stacks/homelab-proxmox-container/terragrunt.stack.hcl
 locals {
   poolid       = values.poolid
   hostname     = values.hostname
@@ -156,7 +156,7 @@ unit "dns" {
 ### Example Stack Structure
 
 ```hcl
-# examples/terragrunt/stacks/proxmox-container/terragrunt.stack.hcl
+# examples/terragrunt/stacks/homelab-proxmox-container/terragrunt.stack.hcl
 locals {
   poolid   = "example-pool"
   hostname = "example-stack-container"
@@ -189,7 +189,7 @@ unit "dns" {
 ```
 
 ```hcl
-# examples/terragrunt/stacks/proxmox-container/units/dns/terragrunt.hcl
+# examples/terragrunt/stacks/homelab-proxmox-container/units/dns/terragrunt.hcl
 include "root" {
   path = find_in_parent_folders("root.hcl")
 }
@@ -268,7 +268,7 @@ inputs = {
 
 ### Step 1: Add DNS unit to production stack
 
-1. Edit `stacks/proxmox-container/terragrunt.stack.hcl`
+1. Edit `stacks/homelab-proxmox-container/terragrunt.stack.hcl`
 2. Add `container_ip` local variable
 3. Add DNS unit block with Git URL source
 4. Set required values for DNS unit
@@ -276,7 +276,7 @@ inputs = {
 
 ### Step 2: Create DNS unit wrapper for examples
 
-1. Create directory `examples/terragrunt/stacks/proxmox-container/units/dns/`
+1. Create directory `examples/terragrunt/stacks/homelab-proxmox-container/units/dns/`
 2. Create `terragrunt.hcl` with relative module path
 3. Add DNS provider generation block
 4. Add dependency block for proxmox_lxc unit
@@ -284,7 +284,7 @@ inputs = {
 
 ### Step 3: Add DNS unit to example stack
 
-1. Edit `examples/terragrunt/stacks/proxmox-container/terragrunt.stack.hcl`
+1. Edit `examples/terragrunt/stacks/homelab-proxmox-container/terragrunt.stack.hcl`
 2. Add DNS unit block with local source path
 3. Set required values using local variables
 
