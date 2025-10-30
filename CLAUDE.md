@@ -51,6 +51,7 @@ Run `mise install` to install all required tools.
 1. **Modules** (`modules/`): Raw Terraform/OpenTofu modules
 
    - `proxmox-lxc`: Creates LXC containers on Proxmox
+   - `proxmox-vm`: Creates virtual machines on Proxmox via template cloning
    - `proxmox-pool`: Creates Proxmox resource pools
    - `dns`: Manages DNS A records on BIND9 servers
    - These are basic building blocks with no Terragrunt-specific logic
@@ -72,7 +73,13 @@ Run `mise install` to install all required tools.
 The `examples/terragrunt/` directory contains working examples for local testing:
 
 - `examples/terragrunt/units/`: Individual unit examples with relative module paths
+  - `proxmox-lxc`: LXC container deployment example
+  - `proxmox-vm`: Virtual machine deployment example
+  - `proxmox-pool`: Resource pool creation example
+  - `dns`: DNS record management example
 - `examples/terragrunt/stacks/`: Complete stack examples with local unit wrappers
+  - `homelab-proxmox-container`: LXC container + pool + DNS
+  - `homelab-proxmox-vm`: Virtual machine + pool + DNS
 - Examples use relative paths (e.g., `../../../.././/modules/proxmox-lxc`) instead of Git URLs
 
 **Git URL Pattern:**
@@ -154,6 +161,14 @@ terragrunt apply
 # Destroy resources
 terragrunt destroy
 
+# Working with VM units
+cd examples/terragrunt/units/proxmox-vm
+
+# Initialize and deploy VM
+terragrunt init
+terragrunt plan
+terragrunt apply
+
 # Working with stacks
 cd examples/terragrunt/stacks/homelab-proxmox-container
 
@@ -168,6 +183,22 @@ terragrunt stack run apply
 
 # Destroy stack resources
 terragrunt stack run destroy
+
+# Working with VM stacks
+cd examples/terragrunt/stacks/homelab-proxmox-vm
+
+# Set required environment variables
+export AWS_ACCESS_KEY_ID="your-minio-access-key"
+export AWS_SECRET_ACCESS_KEY="your-minio-secret-key"
+export PROXMOX_VE_API_TOKEN="root@pam!tofu=xxxxxxxx"
+export TF_VAR_dns_key_secret="your-tsig-key-secret"
+
+# Generate and deploy VM stack
+terragrunt stack generate
+terragrunt stack run apply
+
+# Verify DNS resolution (note: DNS server runs on port 5353)
+dig example-stack-vm.home.sflab.io @192.168.1.13 -p 5353
 ```
 
 ### Development Commands
@@ -206,8 +237,14 @@ pre-commit run --all-files
    - `terraform.source` pointing to Git URL (or relative path for examples)
    - `inputs` block using `values.*` pattern for parameterization
 3. Add example in `examples/terragrunt/units/` with:
-   - Local relative path to module (e.g., `../../../.././/modules/proxmox-lxc`)
+   - Local relative path to module (e.g., `../../../.././/modules/proxmox-lxc` or `../../../.././/modules/proxmox-vm`)
    - Direct `inputs` block with concrete values or dependency outputs
+
+Examples:
+- `units/proxmox-lxc/terragrunt.hcl`: LXC container unit
+- `units/proxmox-vm/terragrunt.hcl`: Virtual machine unit
+- `units/proxmox-pool/terragrunt.hcl`: Resource pool unit
+- `units/dns/terragrunt.hcl`: DNS record unit
 
 ### Adding New Stacks
 
@@ -221,6 +258,10 @@ pre-commit run --all-files
    - Local unit wrappers in `units/` subdirectory for testing
    - Direct references to modules via relative paths
    - Concrete values in `locals` block
+
+Examples:
+- `stacks/homelab-proxmox-container/`: LXC container stack with pool and DNS
+- `stacks/homelab-proxmox-vm/`: Virtual machine stack with pool and DNS
 
 ### Working with Dependencies
 
@@ -416,6 +457,15 @@ Current modules support:
   - Disk: 8GB on `local-lvm` datastore
   - Unprivileged containers by default
   - Outputs: `ipv4` (container IP address)
+- **Virtual Machines** (`modules/proxmox-vm`): Full VMs on Proxmox via template cloning
+  - Resource: `proxmox_virtual_environment_vm`
+  - Required inputs: `vm_name` (string)
+  - Optional inputs: `pool_id` (string, default: "")
+  - Configuration: Clones from template VM 9002 on `pve1` node
+  - Memory: 2048MB dedicated
+  - Network: DHCP IPv4 configuration
+  - Agent: QEMU guest agent enabled for IP address retrieval
+  - Outputs: `ipv4` (VM IP address)
 - **Resource Pools** (`modules/proxmox-pool`): For organizing Proxmox resources
   - Resource: `proxmox_virtual_environment_pool`
   - Required inputs: `pool_id` (string)
