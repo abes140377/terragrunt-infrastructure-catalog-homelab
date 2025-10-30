@@ -11,6 +11,18 @@ terraform {
   // source = "git::git@github.com:abes140377/terragrunt-infrastructure-catalog-homelab.git//modules/proxmox-lxc"
 
   source = "../../../.././/modules/proxmox-lxc"
+
+  extra_arguments "bucket" {
+    commands = [
+      "apply",
+      "plan",
+      "destroy",
+    ]
+
+    arguments = [
+      "-var", "password=password",
+    ]
+  }
 }
 
 dependency "proxmox_pool" {
@@ -24,5 +36,4 @@ dependency "proxmox_pool" {
 inputs = {
   hostname = "example-terragrunt-units-proxmox-lxc"
   poolid   = dependency.proxmox_pool.outputs.poolid
-  password = var.password
 }

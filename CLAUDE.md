@@ -176,6 +176,19 @@ pre-commit run --all-files
 Units in `examples/` can declare dependencies on other units using the `dependency` block:
 
 ```hcl
+terraform {
+  source = "../../../.././/modules/proxmox-lxc"
+
+  # Pass variables via extra_arguments
+  extra_arguments "variables" {
+    commands = ["apply", "plan"]
+
+    arguments = [
+      "-var", "password=your-password",
+    ]
+  }
+}
+
 dependency "proxmox_pool" {
   config_path = "../proxmox-pool"
 
@@ -187,11 +200,41 @@ dependency "proxmox_pool" {
 inputs = {
   hostname = "example-container"
   poolid   = dependency.proxmox_pool.outputs.poolid
-  password = var.password
 }
 ```
 
 **Note**: Standalone units in `units/` use the `values` pattern instead of direct inputs.
+
+### Passing Variables to Modules
+
+Variables can be passed to Terraform modules in several ways:
+
+1. **Via extra_arguments in terragrunt.hcl**:
+```hcl
+terraform {
+  extra_arguments "variables" {
+    commands = ["apply", "plan", "destroy"]
+    arguments = ["-var", "password=my-password"]
+  }
+}
+```
+
+2. **Via TF_VAR_ environment variables**:
+```bash
+export TF_VAR_password="my-password"
+terragrunt apply
+```
+
+3. **Via CLI arguments**:
+```bash
+terragrunt apply -var="password=my-password"
+```
+
+4. **Via .tfvars file**:
+```bash
+echo 'password = "my-password"' > terraform.tfvars
+terragrunt apply
+```
 
 ## Important Notes
 
@@ -277,4 +320,15 @@ Sensitive credentials are stored in `.creds.env.yaml` (SOPS-encrypted):
 To edit encrypted secrets:
 ```bash
 mise run secrets:edit
+```
+
+**Module-specific variables** can be passed via:
+- `TF_VAR_*` environment variables (e.g., `TF_VAR_password`)
+- CLI arguments (e.g., `-var="password=..."`)
+- Terragrunt `extra_arguments` block (see "Passing Variables to Modules" section)
+
+Example:
+```bash
+export TF_VAR_password="your-secure-password"
+terragrunt apply
 ```
