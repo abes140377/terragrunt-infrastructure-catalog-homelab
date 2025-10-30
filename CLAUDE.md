@@ -1,14 +1,17 @@
 <!-- OPENSPEC:START -->
+
 # OpenSpec Instructions
 
 These instructions are for AI assistants working in this project.
 
 Always open `@/openspec/AGENTS.md` when the request:
+
 - Mentions planning or proposals (words like proposal, spec, change, plan)
 - Introduces new capabilities, breaking changes, architecture shifts, or big performance/security work
 - Sounds ambiguous and you need the authoritative spec before coding
 
 Use `@/openspec/AGENTS.md` to learn:
+
 - How to create and apply change proposals
 - Spec format and conventions
 - Project structure and guidelines
@@ -28,6 +31,7 @@ This is a Terragrunt infrastructure catalog for homelab Proxmox environments. It
 ### Tool Versions
 
 Managed via mise (mise.toml):
+
 - **Go**: 1.24.2
 - **OpenTofu**: 1.9.0
 - **Terragrunt**: 0.78.0
@@ -36,6 +40,7 @@ Managed via mise (mise.toml):
 Run `mise install` to install all required tools.
 
 **Note**: When you `cd` into the project directory, mise will automatically:
+
 - Install all required tools if not present
 - Install pre-commit hooks for code quality checks
 
@@ -44,12 +49,14 @@ Run `mise install` to install all required tools.
 **Three-Layer Architecture:**
 
 1. **Modules** (`modules/`): Raw Terraform/OpenTofu modules
+
    - `proxmox-lxc`: Creates LXC containers on Proxmox
    - `proxmox-pool`: Creates Proxmox resource pools
    - `dns`: Manages DNS A records on BIND9 servers
    - These are basic building blocks with no Terragrunt-specific logic
 
 2. **Units** (`units/`): Terragrunt wrappers around modules
+
    - Each unit references a module via Git URL (for external consumption)
    - Units use `values` pattern for parameterization (e.g., `values.hostname`)
    - Units define how modules are configured and can declare dependencies
@@ -63,6 +70,7 @@ Run `mise install` to install all required tools.
 
 **Examples Directory:**
 The `examples/terragrunt/` directory contains working examples for local testing:
+
 - `examples/terragrunt/units/`: Individual unit examples with relative module paths
 - `examples/terragrunt/stacks/`: Complete stack examples with local unit wrappers
 - Examples use relative paths (e.g., `../../../.././/modules/proxmox-lxc`) instead of Git URLs
@@ -73,17 +81,20 @@ Units and stacks use Git URLs in their `source` field because they are designed 
 ### Configuration Files
 
 **Root Configuration** (`examples/terragrunt/root.hcl`):
+
 - Defines shared locals for S3 backend and provider configuration
 - Reads from `s3-backend.hcl` and `provider.hcl`
 - Generates `backend.tf` and `provider.tf` for all child modules
 - All units must include this via `include "root"`
 
 **Backend Configuration** (`examples/terragrunt/s3-backend.hcl`):
+
 - Uses MinIO as S3-compatible backend
 - Requires environment variables: `AWS_ACCESS_KEY_ID` and `AWS_SECRET_ACCESS_KEY`
 - Endpoint: `http://minio.home.sflab.io:9000`
 
 **Provider Configuration** (`examples/terragrunt/provider.hcl`):
+
 - Configures bpg/proxmox provider (>= 0.69.0)
 - Default host: `proxmox.home.sflab.io:8006`
 - Uses `PROXMOX_VE_API_TOKEN` environment variable for authentication
@@ -295,6 +306,7 @@ unit "dns" {
 ```
 
 **Important Stack Requirements:**
+
 1. Each `unit` block **must** have a `path` attribute
 2. Dependencies between units are handled via unit paths (e.g., `lxc_unit_path`) that enable dependency blocks within units
 3. The DNS unit automatically gets the container IP through its dependency on the LXC unit
@@ -302,6 +314,7 @@ unit "dns" {
 5. Stack generates units into `.terragrunt-stack/` directory (gitignored)
 
 **DNS Stack Integration:**
+
 - The `dns` unit registers the container's IP address in DNS after creation
 - Set `TF_VAR_dns_key_secret` environment variable before deploying the stack
 - The DNS unit uses `lxc_unit_path` to create a dependency on the LXC container unit
@@ -309,6 +322,7 @@ unit "dns" {
 - After deployment, the container is resolvable at `${hostname}.home.sflab.io`
 
 **Deploying a Stack with DNS:**
+
 ```bash
 # Set required environment variables
 export AWS_ACCESS_KEY_ID="your-minio-access-key"
@@ -334,6 +348,7 @@ For local testing, create example stacks in `examples/terragrunt/stacks/` with l
 Variables can be passed to Terraform modules in several ways:
 
 1. **Via extra_arguments in terragrunt.hcl**:
+
 ```hcl
 terraform {
   extra_arguments "variables" {
@@ -343,18 +358,21 @@ terraform {
 }
 ```
 
-2. **Via TF_VAR_ environment variables**:
+2. **Via TF*VAR* environment variables**:
+
 ```bash
 export TF_VAR_password="my-password"
 terragrunt apply
 ```
 
 3. **Via CLI arguments**:
+
 ```bash
 terragrunt apply -var="password=my-password"
 ```
 
 4. **Via .tfvars file**:
+
 ```bash
 echo 'password = "my-password"' > terraform.tfvars
 terragrunt apply
@@ -378,6 +396,7 @@ terragrunt apply
 ### Generated Files
 
 Terragrunt automatically generates:
+
 - `backend.tf`: S3 backend configuration
 - `provider.tf`: Proxmox provider configuration
 
@@ -388,6 +407,7 @@ These are regenerated on each run and should not be committed to version control
 Current modules support:
 
 **Proxmox Resources:**
+
 - **LXC Containers** (`modules/proxmox-lxc`): Ubuntu 24.04 standard template on `pve1` node
   - Resource: `proxmox_virtual_environment_container`
   - Required inputs: `hostname` (string), `password` (string, sensitive)
@@ -403,6 +423,7 @@ Current modules support:
   - Outputs: `pool_id` (pool identifier)
 
 **DNS Resources:**
+
 - **DNS A Records** (`modules/dns`): Manages DNS A records on BIND9 servers via RFC 2136 dynamic updates
   - Resource: `dns_a_record_set`
   - Provider: `hashicorp/dns` (>= 3.4.0) - configured in units, not in module
@@ -425,14 +446,17 @@ Current modules support:
 This repository uses the **bpg/proxmox** provider (version >= 0.69.0), not the older telmate/proxmox provider. Key differences:
 
 **Resource Names:**
+
 - LXC: `proxmox_virtual_environment_container` (was `proxmox_lxc`)
 - Pool: `proxmox_virtual_environment_pool` (was `proxmox_pool`)
 
 **Authentication:**
+
 - Environment variable: `PROXMOX_VE_API_TOKEN` (was `PM_API_TOKEN_ID` + `PM_API_TOKEN_SECRET`)
 - Token format: `username@realm!tokenname=secret` (single string)
 
 **LXC Container Configuration:**
+
 - Attributes wrapped in nested blocks: `initialization`, `disk`, `network_interface`, `operating_system`
 - Network interface name: `veth0` (was `eth0`)
 - IP config: `initialization.ip_config.ipv4.address = "dhcp"`
@@ -443,6 +467,7 @@ This repository uses the **bpg/proxmox** provider (version >= 0.69.0), not the o
 ### Pre-commit Hooks
 
 The repository uses pre-commit hooks to maintain code quality:
+
 - **gitleaks**: Detects hardcoded secrets and credentials
 - **fix end of files**: Ensures files end with a newline
 - **trim trailing whitespace**: Removes trailing whitespace
@@ -450,6 +475,7 @@ The repository uses pre-commit hooks to maintain code quality:
 - **OpenTofu validate**: Validates Terraform module syntax and configuration
 
 Hooks run automatically on commit. To run manually:
+
 ```bash
 pre-commit run --all-files
 ```
@@ -457,22 +483,26 @@ pre-commit run --all-files
 ### Environment Variables
 
 Sensitive credentials are stored in `.creds.env.yaml` (SOPS-encrypted):
+
 - `MINIO_USERNAME`, `MINIO_PASSWORD`: MinIO admin credentials
 - `AWS_ACCESS_KEY_ID`, `AWS_SECRET_ACCESS_KEY`: MinIO service account for Terragrunt backend
 - `PROXMOX_VE_API_TOKEN`: Proxmox API token for bpg/proxmox provider
 - `DNS_TSIG_KEY_SECRET`: TSIG key secret for DNS dynamic updates
 
 To edit encrypted secrets:
+
 ```bash
 mise run secrets:edit
 ```
 
 **Module-specific variables** can be passed via:
+
 - `TF_VAR_*` environment variables (e.g., `TF_VAR_password`, `TF_VAR_dns_key_secret`)
 - CLI arguments (e.g., `-var="password=..."`)
 - Terragrunt `extra_arguments` block (see "Passing Variables to Modules" section)
 
 Example:
+
 ```bash
 export TF_VAR_password="your-secure-password"
 export TF_VAR_dns_key_secret="your-tsig-key-secret"
