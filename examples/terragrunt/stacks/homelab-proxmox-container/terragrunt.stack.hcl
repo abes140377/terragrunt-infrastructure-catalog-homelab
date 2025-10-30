@@ -1,5 +1,5 @@
 locals {
-  pool_id  = "example-pool"
+  pool_id  = "example-stack-container-pool"
   hostname = "example-stack-container"
   password = "SecurePassword123!"
 }

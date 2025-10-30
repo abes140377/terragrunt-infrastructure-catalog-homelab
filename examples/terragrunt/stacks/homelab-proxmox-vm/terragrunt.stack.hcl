@@ -1,5 +1,5 @@
 locals {
-  pool_id = "example-vm-pool"
+  pool_id = "example-stack-vm-pool"
   vm_name = "example-stack-vm"
 }
 
