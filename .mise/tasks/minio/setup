@@ -4,7 +4,7 @@ MINIO_HOST="minio.home.sflab.io"
 MINIO_PORT="9000"
 
 MINIO_ALIAS="myminio"
-MINIO_BUCKET_NAME="examples-terragrunt-homelab-terragrunt-tfstates"
+MINIO_BUCKET_NAME="examples-terragrunt-tfstates"
 
 mc alias set $MINIO_ALIAS "http://${MINIO_HOST}:${MINIO_PORT}" $MINIO_USERNAME $MINIO_PASSWORD
 
@@ -23,10 +23,11 @@ if mc ls $MINIO_ALIAS/$MINIO_BUCKET_NAME >/dev/null 2>&1; then
   echo "Bucket $MINIO_BUCKET_NAME already exists"
 else
   echo "Creating bucket $MINIO_BUCKET_NAME"
-  mc mb $MINIO_ALIAS/$MINIO_BUCKET_NAME
-fi
 
-mc version enable $MINIO_ALIAS/$MINIO_BUCKET_NAME
+  mc mb $MINIO_ALIAS/$MINIO_BUCKET_NAME
+
+  mc version enable $MINIO_ALIAS/$MINIO_BUCKET_NAME
+fi
 
 echo ""
 echo "Available MinIO Buckets:"

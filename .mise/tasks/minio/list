@@ -1,0 +1,13 @@
+#!/usr/bin/env bash
+
+MINIO_HOST="minio.home.sflab.io"
+MINIO_PORT="9000"
+
+MINIO_ALIAS="myminio"
+MINIO_BUCKET_NAME="examples-terragrunt-tfstates"
+
+mc alias set $MINIO_ALIAS "http://${MINIO_HOST}:${MINIO_PORT}" $MINIO_USERNAME $MINIO_PASSWORD
+
+echo ""
+echo "Available MinIO Buckets:"
+mc ls --recursive $MINIO_ALIAS/$MINIO_BUCKET_NAME

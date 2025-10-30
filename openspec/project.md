@@ -92,7 +92,7 @@ This is a Terragrunt infrastructure catalog for homelab Proxmox environments. It
 ### Backend Storage
 - **MinIO**: S3-compatible object storage for Terragrunt state files
 - **State Path Pattern**: `${path_relative_to_include()}/tofu.tfstate`
-- **Bucket Naming**: `${prefix}-homelab-terragrunt-tfstates`
+- **Bucket Naming**: `${prefix}-tfstates`
 - **Locking**: Enabled via `use_lockfile = true`
 
 ### Authentication

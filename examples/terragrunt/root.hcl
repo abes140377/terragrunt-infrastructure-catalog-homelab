@@ -15,7 +15,7 @@ remote_state {
   backend = "s3"
 
   config = {
-    bucket                      = "${local.s3_backend_prefix}-homelab-terragrunt-tfstates"
+    bucket                      = "${local.s3_backend_prefix}-tfstates"
 
     key                         = "${path_relative_to_include()}/tofu.tfstate"
     region                      = local.s3_backend_region

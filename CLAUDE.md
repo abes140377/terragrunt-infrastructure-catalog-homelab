@@ -430,7 +430,7 @@ terragrunt apply
 ### State Management
 
 - State is stored in MinIO (S3-compatible storage)
-- Bucket naming: `${prefix}-homelab-terragrunt-tfstates`
+- Bucket naming: `${prefix}-tfstates`
 - State files: `${path_relative_to_include()}/tofu.tfstate`
 - Locking is enabled via `use_lockfile = true`
 
