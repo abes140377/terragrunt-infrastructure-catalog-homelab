@@ -23,7 +23,7 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 
 ## Repository Overview
 
-This is a Terragrunt infrastructure catalog for homelab Proxmox environments. It provides reusable infrastructure components (modules, units, and stacks) for managing Proxmox resources using OpenTofu/Terraform and Terragrunt.
+This is a Terragrunt infrastructure catalog for homelab Proxmox environments. It provides reusable infrastructure components (modules, units, and stacks) for managing Proxmox resources and DNS records using OpenTofu/Terraform and Terragrunt.
 
 ### Tool Versions
 
@@ -46,6 +46,7 @@ Run `mise install` to install all required tools.
 1. **Modules** (`modules/`): Raw Terraform/OpenTofu modules
    - `proxmox-lxc`: Creates LXC containers on Proxmox
    - `proxmox-pool`: Creates Proxmox resource pools
+   - `dns`: Manages DNS A records on BIND9 servers
    - These are basic building blocks with no Terragrunt-specific logic
 
 2. **Units** (`units/`): Terragrunt wrappers around modules
@@ -93,6 +94,9 @@ export AWS_SECRET_ACCESS_KEY="your-secret-key"
 # Set Proxmox credentials (required for bpg/proxmox provider)
 # Format: username@realm!tokenname=secret
 export PROXMOX_VE_API_TOKEN="root@pam!tofu=xxxxxxxx-xxxx-xxxx-xxxx-xxxxxxxxxxxx"
+
+# Set DNS TSIG key secret (required for DNS module)
+export TF_VAR_dns_key_secret="your-tsig-key-secret"
 ```
 
 ### Mise Tasks
@@ -278,9 +282,11 @@ Terragrunt automatically generates:
 
 These are regenerated on each run and should not be committed to version control.
 
-### Proxmox Resources
+### Infrastructure Resources
 
 Current modules support:
+
+**Proxmox Resources:**
 - **LXC Containers** (`modules/proxmox-lxc`): Ubuntu 24.04 standard template on `pve1` node
   - Resource: `proxmox_virtual_environment_container`
   - Required inputs: `hostname` (string), `password` (string, sensitive)
@@ -294,6 +300,22 @@ Current modules support:
   - Required inputs: `poolid` (string)
   - Optional inputs: `description` (string, default: "")
   - Outputs: `poolid` (pool identifier)
+
+**DNS Resources:**
+- **DNS A Records** (`modules/dns`): Manages DNS A records on BIND9 servers via RFC 2136 dynamic updates
+  - Resource: `dns_a_record_set`
+  - Provider: `hashicorp/dns` (>= 3.4.0)
+  - Required inputs:
+    - `zone` (string): DNS zone name (e.g., "home.sflab.io.")
+    - `name` (string): Record name within the zone
+    - `addresses` (list(string)): List of IPv4 addresses
+    - `dns_server` (string): DNS server address and port (e.g., "192.168.1.13:53")
+    - `key_name` (string): TSIG key name for authentication
+    - `key_algorithm` (string): TSIG key algorithm (e.g., "hmac-sha256")
+    - `key_secret` (string, sensitive): TSIG key secret
+  - Optional inputs: `ttl` (number, default: 300)
+  - Outputs: `fqdn` (fully qualified domain name), `addresses` (IP addresses)
+  - Authentication: Uses TSIG (Transaction Signature) for secure dynamic DNS updates
 
 ### Provider Migration Notes
 
@@ -335,6 +357,7 @@ Sensitive credentials are stored in `.creds.env.yaml` (SOPS-encrypted):
 - `MINIO_USERNAME`, `MINIO_PASSWORD`: MinIO admin credentials
 - `AWS_ACCESS_KEY_ID`, `AWS_SECRET_ACCESS_KEY`: MinIO service account for Terragrunt backend
 - `PROXMOX_VE_API_TOKEN`: Proxmox API token for bpg/proxmox provider
+- `DNS_TSIG_KEY_SECRET`: TSIG key secret for DNS dynamic updates
 
 To edit encrypted secrets:
 ```bash
@@ -342,12 +365,68 @@ mise run secrets:edit
 ```
 
 **Module-specific variables** can be passed via:
-- `TF_VAR_*` environment variables (e.g., `TF_VAR_password`)
+- `TF_VAR_*` environment variables (e.g., `TF_VAR_password`, `TF_VAR_dns_key_secret`)
 - CLI arguments (e.g., `-var="password=..."`)
 - Terragrunt `extra_arguments` block (see "Passing Variables to Modules" section)
 
 Example:
 ```bash
 export TF_VAR_password="your-secure-password"
+export TF_VAR_dns_key_secret="your-tsig-key-secret"
 terragrunt apply
 ```
+
+#### DNS TSIG Key Setup
+
+To enable DNS dynamic updates on your BIND9 server, you need to configure TSIG (Transaction Signature) authentication:
+
+**1. Generate TSIG Key on BIND9 Server:**
+
+```bash
+# Using tsig-keygen (recommended)
+tsig-keygen -a hmac-sha256 terraform-key > /etc/bind/terraform-key.conf
+
+# Or using rndc-confgen
+rndc-confgen -a -c /etc/bind/terraform-key.conf -k terraform-key -t /var/run/named
+```
+
+**2. Configure BIND9 to Accept Dynamic Updates:**
+
+Add to `/etc/bind/named.conf.local`:
+
+```bind
+include "/etc/bind/terraform-key.conf";
+
+zone "home.sflab.io" {
+    type master;
+    file "/var/lib/bind/db.home.sflab.io";
+    allow-update { key terraform-key; };
+};
+```
+
+**3. Store TSIG Secret in SOPS:**
+
+Extract the secret from the key file and add to `.creds.env.yaml`:
+
+```bash
+# View the generated key
+sudo cat /etc/bind/terraform-key.conf
+
+# Add to .creds.env.yaml using mise
+mise run secrets:edit
+```
+
+Add this entry:
+```yaml
+DNS_TSIG_KEY_SECRET: "your-base64-secret-from-key-file"
+```
+
+**4. Use in Terragrunt:**
+
+Reference the secret via environment variable:
+
+```bash
+export TF_VAR_dns_key_secret="$(sops -d .creds.env.yaml | yq '.DNS_TSIG_KEY_SECRET')"
+```
+
+Or use the `extra_arguments` block in terragrunt.hcl (see `examples/terragrunt/units/dns/terragrunt.hcl`).

@@ -3,7 +3,8 @@
     "allow": [
       "Bash(mise tasks:*)",
       "Bash(test:*)",
-      "Bash(cat:*)"
+      "Bash(cat:*)",
+      "Bash(openspec show:*)"
     ],
     "deny": [],
     "ask": []
