@@ -35,5 +35,5 @@ terraform {
 }
 
 inputs = {
-  poolid = "example-pool"
+  pool_id = "example-pool"
 }

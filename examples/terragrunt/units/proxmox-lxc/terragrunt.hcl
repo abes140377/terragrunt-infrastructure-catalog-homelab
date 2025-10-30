@@ -50,11 +50,11 @@ dependency "proxmox_pool" {
   config_path = "../proxmox-pool"
 
   mock_outputs = {
-    content = "mock-pool"
+    pool_id = "mock-pool"
   }
 }
 
 inputs = {
   hostname = "example-terragrunt-units-proxmox-lxc"
-  poolid   = dependency.proxmox_pool.outputs.poolid
+  pool_id  = dependency.proxmox_pool.outputs.pool_id
 }

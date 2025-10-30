@@ -1,7 +1,7 @@
 resource "proxmox_virtual_environment_container" "this" {
   node_name    = "pve1"
   unprivileged = true
-  pool_id      = var.poolid != "" ? var.poolid : null
+  pool_id      = var.pool_id != "" ? var.pool_id : null
 
   initialization {
     hostname = var.hostname
