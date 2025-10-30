@@ -59,7 +59,7 @@ Run `mise install` to install all required tools.
    - Define multiple units that work together
    - Use `terragrunt.stack.hcl` files
    - Each unit must specify a `path` attribute for deployment location
-   - Example: `stacks/proxmox-container/` combines proxmox-pool and proxmox-lxc units
+   - Example: `stacks/proxmox-container/` combines proxmox-pool, proxmox-lxc, and dns units
 
 **Examples Directory:**
 The `examples/terragrunt/` directory contains working examples for local testing:
@@ -247,7 +247,7 @@ inputs = {
 
 ### Working with Stacks
 
-Stacks allow you to deploy multiple units together as a coordinated group. Here's an example stack structure:
+Stacks allow you to deploy multiple units together as a coordinated group. Here's an example stack structure with DNS integration:
 
 ```hcl
 # stacks/proxmox-container/terragrunt.stack.hcl
@@ -271,18 +271,61 @@ unit "proxmox_lxc" {
   path   = "proxmox-lxc"  # REQUIRED: deployment path within .terragrunt-stack
 
   values = {
-    hostname = local.hostname
-    password = local.password
-    poolid   = local.poolid  # Pass poolid directly, not via dependency
+    hostname        = local.hostname
+    password        = local.password
+    poolid          = local.poolid
+    pool_unit_path  = "../proxmox-pool"
+  }
+}
+
+unit "dns" {
+  source = "git::git@github.com:abes140377/terragrunt-infrastructure-catalog-homelab.git//units/dns?ref=${values.version}"
+  path   = "dns"  # REQUIRED: deployment path within .terragrunt-stack
+
+  values = {
+    zone           = "home.sflab.io."
+    name           = local.hostname
+    dns_server     = "192.168.1.13"
+    dns_port       = 5353
+    key_name       = "ddnskey."
+    key_algorithm  = "hmac-sha512"
+    lxc_unit_path  = "../proxmox-lxc"  # Enables dependency on LXC container IP
   }
 }
 ```
 
 **Important Stack Requirements:**
 1. Each `unit` block **must** have a `path` attribute
-2. Dependencies between units are handled by passing values, not using `dependency` blocks
-3. Use `terragrunt stack run <command>` to operate on the entire stack
-4. Stack generates units into `.terragrunt-stack/` directory (gitignored)
+2. Dependencies between units are handled via unit paths (e.g., `lxc_unit_path`) that enable dependency blocks within units
+3. The DNS unit automatically gets the container IP through its dependency on the LXC unit
+4. Use `terragrunt stack run <command>` to operate on the entire stack
+5. Stack generates units into `.terragrunt-stack/` directory (gitignored)
+
+**DNS Stack Integration:**
+- The `dns` unit registers the container's IP address in DNS after creation
+- Set `TF_VAR_dns_key_secret` environment variable before deploying the stack
+- The DNS unit uses `lxc_unit_path` to create a dependency on the LXC container unit
+- Execution order: `proxmox_pool` → `proxmox_lxc` → `dns` (automatic via dependencies)
+- After deployment, the container is resolvable at `${hostname}.home.sflab.io`
+
+**Deploying a Stack with DNS:**
+```bash
+# Set required environment variables
+export AWS_ACCESS_KEY_ID="your-minio-access-key"
+export AWS_SECRET_ACCESS_KEY="your-minio-secret-key"
+export PROXMOX_VE_API_TOKEN="root@pam!tofu=xxxxxxxx"
+export TF_VAR_dns_key_secret="your-tsig-key-secret"
+
+# Navigate to stack directory
+cd examples/terragrunt/stacks/proxmox-container
+
+# Generate and deploy stack
+terragrunt stack generate
+terragrunt stack run apply
+
+# Verify DNS resolution (note: DNS server runs on port 5353)
+dig example-stack-container.home.sflab.io @192.168.1.13 -p 5353
+```
 
 For local testing, create example stacks in `examples/terragrunt/stacks/` with local unit wrappers that use relative paths to modules.
 
@@ -362,20 +405,20 @@ Current modules support:
 **DNS Resources:**
 - **DNS A Records** (`modules/dns`): Manages DNS A records on BIND9 servers via RFC 2136 dynamic updates
   - Resource: `dns_a_record_set`
-  - Provider: `hashicorp/dns` (>= 3.4.0)
+  - Provider: `hashicorp/dns` (>= 3.4.0) - configured in units, not in module
   - Required inputs:
     - `zone` (string): DNS zone name (e.g., "home.sflab.io.")
     - `name` (string): Record name within the zone
     - `addresses` (list(string)): List of IPv4 addresses
-    - `dns_server` (string): DNS server IPv4 address (e.g., "192.168.1.13")
-    - `key_name` (string): TSIG key name for authentication
-    - `key_algorithm` (string): TSIG key algorithm (e.g., "hmac-sha256")
-    - `key_secret` (string, sensitive): TSIG key secret
   - Optional inputs:
     - `ttl` (number, default: 300)
-    - `dns_port` (number, default: 53)
   - Outputs: `fqdn` (fully qualified domain name), `addresses` (IP addresses)
-  - Authentication: Uses TSIG (Transaction Signature) for secure dynamic DNS updates
+  - DNS Server Configuration (in units):
+    - Server: `192.168.1.13:5353` (Port 5353, not default 53!)
+    - TSIG Key: `ddnskey` (fully-qualified with trailing dot)
+    - Algorithm: `hmac-sha512`
+    - Authentication: Uses TSIG (Transaction Signature) for secure dynamic DNS updates
+    - Secret: Passed via `TF_VAR_dns_key_secret` environment variable
 
 ### Provider Migration Notes
 
@@ -443,26 +486,34 @@ To enable DNS dynamic updates on your BIND9 server, you need to configure TSIG (
 **1. Generate TSIG Key on BIND9 Server:**
 
 ```bash
-# Using tsig-keygen (recommended)
-tsig-keygen -a hmac-sha256 terraform-key > /etc/bind/terraform-key.conf
+# Using tsig-keygen (recommended) - use hmac-sha512 algorithm
+tsig-keygen -a hmac-sha512 ddnskey > /etc/bind/keys/ddnskey.key
 
 # Or using rndc-confgen
-rndc-confgen -a -c /etc/bind/terraform-key.conf -k terraform-key -t /var/run/named
+rndc-confgen -a -c /etc/bind/keys/ddnskey.key -k ddnskey -t /var/run/named
 ```
 
 **2. Configure BIND9 to Accept Dynamic Updates:**
 
+Add to `/etc/bind/named.conf.options`:
+
+```bind
+include "/etc/bind/keys/ddnskey.key";
+```
+
 Add to `/etc/bind/named.conf.local`:
 
 ```bind
-include "/etc/bind/terraform-key.conf";
-
 zone "home.sflab.io" {
-    type master;
+    type primary;
     file "/var/lib/bind/db.home.sflab.io";
-    allow-update { key terraform-key; };
+    update-policy {
+        grant ddnskey zonesub any;
+    };
 };
 ```
+
+**Important:** BIND9 must listen on port 5353 for dynamic updates in this configuration.
 
 **3. Store TSIG Secret in SOPS:**
 
@@ -470,7 +521,7 @@ Extract the secret from the key file and add to `.creds.env.yaml`:
 
 ```bash
 # View the generated key
-sudo cat /etc/bind/terraform-key.conf
+sudo cat /etc/bind/keys/ddnskey.key
 
 # Add to .creds.env.yaml using mise
 mise run secrets:edit
@@ -489,4 +540,4 @@ Reference the secret via environment variable:
 export TF_VAR_dns_key_secret="$(sops -d .creds.env.yaml | yq '.DNS_TSIG_KEY_SECRET')"
 ```
 
-Or use the `extra_arguments` block in terragrunt.hcl (see `examples/terragrunt/units/dns/terragrunt.hcl`).
+The DNS provider configuration is generated automatically in unit wrappers with the correct server, port, key name, and algorithm. The secret is passed via the `TF_VAR_dns_key_secret` environment variable.

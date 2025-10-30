@@ -30,7 +30,7 @@ The `proxmox-container` stack SHALL integrate the DNS unit to automatically regi
 - **WHEN** the DNS unit is configured
 - **THEN** it SHALL target the BIND9 DNS server at `192.168.1.13`
 - **AND** use port `53`
-- **AND** use TSIG authentication with key name `terraform-key`
+- **AND** use TSIG authentication with key name `ddnskey`
 - **AND** use TSIG algorithm `hmac-sha256`
 
 #### Scenario: DNS credentials via environment variable
