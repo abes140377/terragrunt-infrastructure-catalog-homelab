@@ -479,65 +479,6 @@ export TF_VAR_dns_key_secret="your-tsig-key-secret"
 terragrunt apply
 ```
 
-#### DNS TSIG Key Setup
+## Important Reminders
 
-To enable DNS dynamic updates on your BIND9 server, you need to configure TSIG (Transaction Signature) authentication:
-
-**1. Generate TSIG Key on BIND9 Server:**
-
-```bash
-# Using tsig-keygen (recommended) - use hmac-sha512 algorithm
-tsig-keygen -a hmac-sha512 ddnskey > /etc/bind/keys/ddnskey.key
-
-# Or using rndc-confgen
-rndc-confgen -a -c /etc/bind/keys/ddnskey.key -k ddnskey -t /var/run/named
-```
-
-**2. Configure BIND9 to Accept Dynamic Updates:**
-
-Add to `/etc/bind/named.conf.options`:
-
-```bind
-include "/etc/bind/keys/ddnskey.key";
-```
-
-Add to `/etc/bind/named.conf.local`:
-
-```bind
-zone "home.sflab.io" {
-    type primary;
-    file "/var/lib/bind/db.home.sflab.io";
-    update-policy {
-        grant ddnskey zonesub any;
-    };
-};
-```
-
-**Important:** BIND9 must listen on port 5353 for dynamic updates in this configuration.
-
-**3. Store TSIG Secret in SOPS:**
-
-Extract the secret from the key file and add to `.creds.env.yaml`:
-
-```bash
-# View the generated key
-sudo cat /etc/bind/keys/ddnskey.key
-
-# Add to .creds.env.yaml using mise
-mise run secrets:edit
-```
-
-Add this entry:
-```yaml
-DNS_TSIG_KEY_SECRET: "your-base64-secret-from-key-file"
-```
-
-**4. Use in Terragrunt:**
-
-Reference the secret via environment variable:
-
-```bash
-export TF_VAR_dns_key_secret="$(sops -d .creds.env.yaml | yq '.DNS_TSIG_KEY_SECRET')"
-```
-
-The DNS provider configuration is generated automatically in unit wrappers with the correct server, port, key name, and algorithm. The secret is passed via the `TF_VAR_dns_key_secret` environment variable.
+- Do not add any 'DNS TSIG Key Setup' instructions to CLUADE.md because the setup is done in a separate Ansible project
