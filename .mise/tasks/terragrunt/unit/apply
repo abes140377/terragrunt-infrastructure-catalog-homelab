@@ -1,0 +1,19 @@
+#!/usr/bin/env bash
+
+SCRIPT_DIR=$( cd -- "$( dirname -- "${BASH_SOURCE[0]}" )" &> /dev/null && pwd )
+
+PROJECT_DIR="$SCRIPT_DIR/../../../.."
+UNITS_DIR="$PROJECT_DIR/examples/terragrunt/units"
+
+# list all directories in examples/terragrunt/units and create a array of the names
+unit_dirs=()
+while IFS= read -r -d '' dir; do
+  unit_dirs+=("$(basename "$dir")")
+done < <(find "$PROJECT_DIR/examples/terragrunt/units" -mindepth 1 -maxdepth 1 -type d -print0)
+
+# Show a selection menu with gum to select a unit
+selected_unit=$(printf "%s\n" "${unit_dirs[@]}" | gum choose --header="Select a unit to operate on:")
+
+cd "$UNITS_DIR/$selected_unit"
+
+terragrunt apply --auto-approve

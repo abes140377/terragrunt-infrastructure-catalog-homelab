@@ -1,0 +1,19 @@
+#!/usr/bin/env bash
+
+SCRIPT_DIR=$( cd -- "$( dirname -- "${BASH_SOURCE[0]}" )" &> /dev/null && pwd )
+
+PROJECT_DIR="$SCRIPT_DIR/../../../.."
+STACKS_DIR="$PROJECT_DIR/examples/terragrunt/stacks"
+
+stack_dirs=()
+while IFS= read -r -d '' dir; do
+  stack_dirs+=("$(basename "$dir")")
+done < <(find "$STACKS_DIR" -mindepth 1 -maxdepth 1 -type d -print0)
+
+# Show a selection menu with gum to select a unit
+selected_stack=$(printf "%s\n" "${stack_dirs[@]}" | gum choose --header="Select a stack to operate on:")
+
+cd "$STACKS_DIR/$selected_stack"
+
+terragrunt stack generate
+terragrunt stack run apply -- --auto-approve
