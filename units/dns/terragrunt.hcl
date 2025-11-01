@@ -45,23 +45,23 @@ terraform {
 }
 
 dependency "proxmox_lxc" {
-  config_path = try(values.lxc_unit_path, "")
+  config_path = coalesce(try(values.lxc_unit_path, null), "../__dummy_lxc__")
 
   mock_outputs = {
     ipv4 = "192.168.1.100"
   }
 
-  skip_outputs = try(values.lxc_unit_path, "") == ""
+  skip_outputs = try(values.lxc_unit_path, null) == null
 }
 
 dependency "proxmox_vm" {
-  config_path = try(values.vm_unit_path, "")
+  config_path = coalesce(try(values.vm_unit_path, null), "../__dummy_vm__")
 
   mock_outputs = {
     ipv4 = "192.168.1.101"
   }
 
-  skip_outputs = try(values.vm_unit_path, "") == ""
+  skip_outputs = try(values.vm_unit_path, null) == null
 }
 
 inputs = {
