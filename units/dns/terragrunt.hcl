@@ -4,10 +4,9 @@ include "root" {
 
 # Dependencies - ensure DNS runs after VM or LXC is created
 dependencies {
-  paths = compact([
-    try(values.lxc_unit_path, null),
-    try(values.vm_unit_path, null)
-  ])
+  paths = [
+    try(values.vm_unit_path, try(values.lxc_unit_path, ""))
+  ]
 }
 
 # Generate DNS provider block
@@ -44,24 +43,12 @@ terraform {
   source = "git::git@github.com:abes140377/terragrunt-infrastructure-catalog-homelab.git//modules/dns?ref=${values.version}"
 }
 
-dependency "proxmox_lxc" {
-  config_path = coalesce(try(values.lxc_unit_path, null), "../__dummy_lxc__")
+dependency "compute" {
+  config_path = try(values.vm_unit_path, try(values.lxc_unit_path, ""))
 
   mock_outputs = {
     ipv4 = "192.168.1.100"
   }
-
-  skip_outputs = try(values.lxc_unit_path, null) == null
-}
-
-dependency "proxmox_vm" {
-  config_path = coalesce(try(values.vm_unit_path, null), "../__dummy_vm__")
-
-  mock_outputs = {
-    ipv4 = "192.168.1.101"
-  }
-
-  skip_outputs = try(values.vm_unit_path, null) == null
 }
 
 inputs = {
@@ -69,8 +56,7 @@ inputs = {
   zone      = values.zone
   name      = values.name
   addresses = try(
-    [dependency.proxmox_lxc.outputs.ipv4],
-    [dependency.proxmox_vm.outputs.ipv4],
+    [dependency.compute.outputs.ipv4],
     values.addresses,
     []
   )
