@@ -5,8 +5,8 @@ include "root" {
 # Dependencies - ensure DNS runs after VM or LXC is created
 dependencies {
   paths = compact([
-    try(values.lxc_unit_path, ""),
-    try(values.vm_unit_path, "")
+    try(values.lxc_unit_path, null),
+    try(values.vm_unit_path, null)
   ])
 }
 
