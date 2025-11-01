@@ -10,8 +10,8 @@ dependencies {
 }
 
 # Generate DNS provider block
-generate "provider" {
-  path      = "provider.tf"
+generate "dns_provider" {
+  path      = "dns_provider.tf"
   if_exists = "overwrite_terragrunt"
   contents  = <<EOF
 variable "dns_key_secret" {
