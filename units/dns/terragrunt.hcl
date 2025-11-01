@@ -9,9 +9,9 @@ dependencies {
   ]
 }
 
-# Generate DNS provider block
-generate "dns_provider" {
-  path      = "dns_provider.tf"
+# Generate DNS provider block - overwrite root.hcl provider block since DNS unit doesn't need Proxmox provider
+generate "provider" {
+  path      = "provider.tf"
   if_exists = "overwrite_terragrunt"
   contents  = <<EOF
 variable "dns_key_secret" {
