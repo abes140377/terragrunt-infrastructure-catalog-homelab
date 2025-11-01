@@ -9,9 +9,9 @@ dependencies {
   ]
 }
 
-# Generate DNS provider block - overwrite root.hcl provider block since DNS unit doesn't need Proxmox provider
-generate "provider" {
-  path      = "provider.tf"
+# Generate DNS provider block
+generate "dns_provider" {
+  path      = "provider_dns.tf"
   if_exists = "overwrite_terragrunt"
   contents  = <<EOF
 variable "dns_key_secret" {
@@ -30,6 +30,14 @@ provider "dns" {
   }
 }
 EOF
+}
+
+# Override root.hcl provider block - DNS unit doesn't need Proxmox provider
+generate "provider" {
+  path      = "provider.tf"
+  if_exists = "overwrite_terragrunt"
+  contents  = "# DNS unit does not require Proxmox provider\n"
+  disable   = false
 }
 
 terraform {
