@@ -2,6 +2,14 @@ include "root" {
   path = find_in_parent_folders("root.hcl")
 }
 
+# Dependencies - ensure DNS runs after VM or LXC is created
+dependencies {
+  paths = compact([
+    try(values.lxc_unit_path, ""),
+    try(values.vm_unit_path, "")
+  ])
+}
+
 # Generate DNS provider block
 generate "provider" {
   path      = "provider.tf"
@@ -46,11 +54,26 @@ dependency "proxmox_lxc" {
   skip_outputs = try(values.lxc_unit_path, "") == ""
 }
 
+dependency "proxmox_vm" {
+  config_path = try(values.vm_unit_path, "")
+
+  mock_outputs = {
+    ipv4 = "192.168.1.101"
+  }
+
+  skip_outputs = try(values.vm_unit_path, "") == ""
+}
+
 inputs = {
   # Required inputs
   zone      = values.zone
   name      = values.name
-  addresses = try([dependency.proxmox_lxc.outputs.ipv4], values.addresses, [])
+  addresses = try(
+    [dependency.proxmox_lxc.outputs.ipv4],
+    [dependency.proxmox_vm.outputs.ipv4],
+    values.addresses,
+    []
+  )
 
   # Optional inputs
   ttl = try(values.ttl, 300)
