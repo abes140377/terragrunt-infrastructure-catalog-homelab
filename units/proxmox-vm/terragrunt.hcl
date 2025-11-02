@@ -2,6 +2,10 @@ include "root" {
   path = find_in_parent_folders("root.hcl")
 }
 
+include "provider_proxmox" {
+  path = find_in_parent_folders("provider_proxmox.hcl")
+}
+
 dependencies {
   paths = [values.pool_unit_path]
 }
