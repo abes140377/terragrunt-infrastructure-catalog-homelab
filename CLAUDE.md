@@ -130,17 +130,29 @@ export TF_VAR_dns_key_secret="your-tsig-key-secret"
 # Setup MinIO bucket and service account
 mise run minio:setup
 
-# Setup Proxmox resources
-mise run proxmox:setup
+# List MinIO buckets and their contents
+mise run minio:list
 
-# Install Python dependencies
-mise run install-deps
+# Setup Proxmox resources (creates role and user)
+mise run proxmox:setup
 
 # Edit SOPS-encrypted secrets
 mise run secrets:edit
 
 # Clean up Terragrunt cache files
 mise run terragrunt:cleanup
+
+# Quick apply for units (interactive selection menu)
+mise run terragrunt:unit:apply
+
+# Quick destroy for units (interactive selection menu)
+mise run terragrunt:unit:destroy
+
+# Quick apply for stacks (interactive selection menu)
+mise run terragrunt:stack:apply
+
+# Quick destroy for stacks (interactive selection menu)
+mise run terragrunt:stack:destroy
 ```
 
 ### Terragrunt Operations
