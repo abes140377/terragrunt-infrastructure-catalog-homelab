@@ -43,7 +43,7 @@ remote_state {
 
   config = {
     bucket                      = "homelab-terragrunt-tfstates"
-    key                         = "${local.environment_name}/dns/tofu.tfstate"
+    key                         = "${path_relative_to_include()}/tofu.tfstate"
     region                      = "eu-central-1"
     endpoint                    = "http://minio.home.sflab.io:9000"
     skip_credentials_validation = true
