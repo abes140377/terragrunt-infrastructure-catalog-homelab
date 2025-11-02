@@ -16,4 +16,7 @@ selected_stack=$(printf "%s\n" "${stack_dirs[@]}" | gum choose --header="Select 
 # echo "You selected: $selected_stack"
 cd "./examples/terragrunt/stacks/$selected_stack"
 
-terragrunt stack run destroy -- --auto-approve
+STACK_RUN_DESTROY_CMD="terragrunt stack run destroy -- --auto-approve"
+
+echo "Running: $STACK_RUN_DESTROY_CMD"
+eval $STACK_RUN_DESTROY_CMD

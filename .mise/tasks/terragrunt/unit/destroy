@@ -16,4 +16,7 @@ selected_unit=$(printf "%s\n" "${unit_dirs[@]}" | gum choose --header="Select a 
 
 cd "$UNITS_DIR/$selected_unit"
 
-terragrunt destroy --auto-approve
+TERRAGRUNT_DESTROY_CMD="terragrunt destroy --auto-approve"
+
+echo "Running: $TERRAGRUNT_DESTROY_CMD"
+eval $TERRAGRUNT_DESTROY_CMD

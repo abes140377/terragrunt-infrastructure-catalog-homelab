@@ -16,4 +16,7 @@ selected_unit=$(printf "%s\n" "${unit_dirs[@]}" | gum choose --header="Select a 
 
 cd "$UNITS_DIR/$selected_unit"
 
-terragrunt apply --auto-approve
+TERRAGRUNT_APPLY_CMD="terragrunt apply --auto-approve"
+
+echo "Running: $TERRAGRUNT_APPLY_CMD"
+eval $TERRAGRUNT_APPLY_CMD
