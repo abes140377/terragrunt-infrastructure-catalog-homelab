@@ -468,14 +468,14 @@ Tasks are ordered to enable incremental progress with testable deliverables at e
 
 ## Completion Criteria
 
-- [ ] All module, unit, and stack files updated with multi-VM support
-- [ ] DNS integration works with multiple VMs using dynamic unit generation
-- [ ] All examples demonstrate multi-VM usage
-- [ ] CLAUDE.md fully documents new capabilities
-- [ ] All pre-commit hooks pass
-- [ ] OpenSpec validation passes with `--strict` flag
-- [ ] Example stack generates and plans successfully
-- [ ] All tasks completed and validated
+- [x] All module, unit, and stack files updated with multi-VM support
+- [x] DNS integration works with multiple VMs using dynamic unit generation
+- [x] All examples demonstrate multi-VM usage
+- [x] CLAUDE.md fully documents new capabilities
+- [x] All pre-commit hooks pass
+- [x] OpenSpec validation passes with `--strict` flag
+- [x] Example stack generates and plans successfully
+- [x] All tasks completed and validated
 
 ---
 

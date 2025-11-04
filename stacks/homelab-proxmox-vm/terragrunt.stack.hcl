@@ -7,6 +7,9 @@
 # - values.version: Git ref for unit sources (e.g., "v1.0.0")
 # - values.pool_id: Proxmox resource pool ID
 # - values.vms: Map of VM configurations
+# - values.dns_zone: DNS zone for records (default: "home.sflab.io.")
+# - values.dns_server: DNS server address (default: "192.168.1.13")
+# - values.dns_port: DNS server port (default: 5353)
 #
 # Example values.vms structure:
 # vms = {
@@ -21,10 +24,17 @@
 #     cores   = 4
 #   }
 # }
+#
+# Note: When adding or removing VMs, you must also add or remove
+# the corresponding DNS unit blocks below. Dynamic unit generation
+# is not supported in Terragrunt stack files.
 
 locals {
-  pool_id = values.pool_id != "" ? values.pool_id : ""
-  vms     = values.vms
+  pool_id    = values.pool_id != "" ? values.pool_id : ""
+  vms        = values.vms
+  dns_zone   = try(values.dns_zone, "home.sflab.io.")
+  dns_server = try(values.dns_server, "192.168.1.13")
+  dns_port   = try(values.dns_port, 5353)
 }
 
 # Create a resource pool for organizing VMs
@@ -63,31 +73,9 @@ unit "proxmox_vm" {
   }
 }
 
-# Create DNS A records for each VM using dynamic unit generation
-# This creates one DNS unit per VM with path pattern: dns-{vm_key}
-dynamic "unit" {
-  for_each = local.vms
-
-  content {
-    // NOTE: Take note that this source here uses a Git URL instead of a local path.
-    //
-    // This is because units and stacks are generated
-    // as shallow directories when consumed.
-    //
-    // Assume that a user consuming this stack will exclusively have access
-    // to the directory this file is in, and nothing else in this repository.
-    source = "git::git@github.com:abes140377/terragrunt-infrastructure-catalog-homelab.git//units/dns?ref=${values.version}"
-    path   = "dns-${unit.key}" # Unique path per VM
-
-    values = {
-      zone          = "home.sflab.io."
-      name          = unit.value.vm_name # DNS name matches VM name
-      dns_server    = "192.168.1.13"
-      dns_port      = 5353
-      key_name      = "ddnskey."
-      key_algorithm = "hmac-sha512"
-      vm_unit_path  = "../proxmox-vm"
-      vm_identifier = unit.key # Tells DNS unit which VM in the map to get IP from
-    }
-  }
-}
+# NOTE: DNS units must be manually defined for each VM
+# To add a new VM's DNS record, copy one of the blocks below and update:
+# - unit name (e.g., "dns_newvm")
+# - path (e.g., "dns-newvm")
+# - name (e.g., local.vms["newvm"].vm_name)
+# - vm_identifier (e.g., "newvm")

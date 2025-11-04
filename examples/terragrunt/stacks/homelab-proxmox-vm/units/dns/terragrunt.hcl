@@ -43,22 +43,15 @@ dependency "proxmox_vm" {
   }
 }
 
-locals {
+inputs = {
+  zone = values.zone
+  name = values.name
   # Extract specific VM IP if vm_identifier is provided (multi-VM pattern)
   # Otherwise, fall back to single-VM pattern (ipv4 output)
   # If neither is available, try using provided addresses value
-  vm_ip = try(
-    dependency.proxmox_vm.outputs.vms[values.vm_identifier].ipv4,
-    dependency.proxmox_vm.outputs.ipv4,
-    null
-  )
-}
-
-inputs = {
-  zone      = values.zone
-  name      = values.name
   addresses = try(
-    [local.vm_ip],
+    [dependency.proxmox_vm.outputs.vms[values.vm_identifier].ipv4],
+    [dependency.proxmox_vm.outputs.ipv4],
     values.addresses,
     []
   )

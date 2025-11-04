@@ -36,18 +36,17 @@ dependency "proxmox_pool" {
   skip_outputs = try(values.pool_id != "", false)
 }
 
-locals {
-  # If a global pool_id is provided at the unit level, merge it into each VM configuration
-  # that doesn't already specify its own pool_id
-  global_pool_id = try(values.pool_id, dependency.proxmox_pool.outputs.pool_id)
-  vms_with_pool = local.global_pool_id != "" ? {
-    for k, vm in values.vms : k => merge(vm, {
-      pool_id = try(vm.pool_id, local.global_pool_id)
-    })
-  } : values.vms
-}
-
 inputs = {
   # Map of VMs to create
-  vms = local.vms_with_pool
+  # If a global pool_id is provided at the unit level, merge it into each VM configuration
+  # that doesn't already specify its own pool_id
+  vms = try(values.pool_id, "") != "" ? {
+    for k, vm in values.vms : k => merge(vm, {
+      pool_id = try(vm.pool_id, values.pool_id)
+    })
+  } : {
+    for k, vm in values.vms : k => merge(vm, {
+      pool_id = try(vm.pool_id, dependency.proxmox_pool.outputs.pool_id)
+    })
+  }
 }

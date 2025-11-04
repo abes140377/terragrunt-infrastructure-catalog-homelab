@@ -6,7 +6,7 @@
 # To customize:
 # 1. Add or remove VMs by editing the vms map
 # 2. Adjust VM properties (memory, cores, etc.) as needed
-# 3. Each VM automatically gets a DNS A record
+# 3. Add or remove corresponding DNS units below
 #
 # Required environment variables:
 # - AWS_ACCESS_KEY_ID: MinIO access key for Terragrunt backend
@@ -43,13 +43,6 @@ locals {
       memory  = 8192          # 8GB RAM for database workload
     }
   }
-
-  # To add a new VM, simply add a new entry to the map above:
-  # "app01" = {
-  #   vm_name = "app-server-01"
-  #   memory  = 2048
-  #   cores   = 2  # Optional: defaults to 2 if not specified
-  # }
 }
 
 # Create a resource pool for organizing VMs
@@ -78,26 +71,59 @@ unit "proxmox_vm" {
   }
 }
 
-# Create DNS A records for each VM using dynamic unit generation
-# This creates one DNS unit per VM (dns-web01, dns-web02, dns-db01)
-dynamic "unit" {
-  for_each = local.vms
+# DNS unit for web01
+unit "dns_web01" {
+  // Using local units with relative paths for testing
+  // In production, use: git::git@github.com:abes140377/terragrunt-infrastructure-catalog-homelab.git//units/dns?ref=v1.0.0
+  source = "./units/dns"
+  path   = "dns-web01"
 
-  content {
-    // Using local units with relative paths for testing
-    // In production, use: git::git@github.com:abes140377/terragrunt-infrastructure-catalog-homelab.git//units/dns?ref=v1.0.0
-    source = "./units/dns"
-    path   = "dns-${unit.key}" # Unique path per VM (dns-web01, dns-web02, etc.)
+  values = {
+    zone          = "home.sflab.io."
+    name          = local.vms["web01"].vm_name
+    dns_server    = "192.168.1.13"
+    dns_port      = 5353
+    key_name      = "ddnskey."
+    key_algorithm = "hmac-sha512"
+    vm_unit_path  = "../proxmox-vm"
+    vm_identifier = "web01" # Tells DNS unit which VM in the map to get IP from
+  }
+}
 
-    values = {
-      zone          = "home.sflab.io."
-      name          = unit.value.vm_name # DNS name matches VM name
-      dns_server    = "192.168.1.13"
-      dns_port      = 5353
-      key_name      = "ddnskey."
-      key_algorithm = "hmac-sha512"
-      vm_unit_path  = "../proxmox-vm"
-      vm_identifier = unit.key # Tells DNS unit which VM in the map to get IP from
-    }
+# DNS unit for web02
+unit "dns_web02" {
+  // Using local units with relative paths for testing
+  // In production, use: git::git@github.com:abes140377/terragrunt-infrastructure-catalog-homelab.git//units/dns?ref=v1.0.0
+  source = "./units/dns"
+  path   = "dns-web02"
+
+  values = {
+    zone          = "home.sflab.io."
+    name          = local.vms["web02"].vm_name
+    dns_server    = "192.168.1.13"
+    dns_port      = 5353
+    key_name      = "ddnskey."
+    key_algorithm = "hmac-sha512"
+    vm_unit_path  = "../proxmox-vm"
+    vm_identifier = "web02"
+  }
+}
+
+# DNS unit for db01
+unit "dns_db01" {
+  // Using local units with relative paths for testing
+  // In production, use: git::git@github.com:abes140377/terragrunt-infrastructure-catalog-homelab.git//units/dns?ref=v1.0.0
+  source = "./units/dns"
+  path   = "dns-db01"
+
+  values = {
+    zone          = "home.sflab.io."
+    name          = local.vms["db01"].vm_name
+    dns_server    = "192.168.1.13"
+    dns_port      = 5353
+    key_name      = "ddnskey."
+    key_algorithm = "hmac-sha512"
+    vm_unit_path  = "../proxmox-vm"
+    vm_identifier = "db01"
   }
 }

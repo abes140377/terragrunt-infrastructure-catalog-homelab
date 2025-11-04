@@ -430,24 +430,55 @@ unit "proxmox_vm" {
   }
 }
 
-# Create DNS A records for each VM using dynamic unit generation
-dynamic "unit" {
-  for_each = local.vms
+# Create DNS A records for each VM
+# Note: Terragrunt stack files don't support dynamic blocks,
+# so each DNS unit must be manually defined
 
-  content {
-    source = "./units/dns"
-    path   = "dns-${unit.key}"  # Creates dns-web01, dns-web02, dns-db01
+unit "dns_web01" {
+  source = "./units/dns"
+  path   = "dns-web01"
 
-    values = {
-      zone          = "home.sflab.io."
-      name          = unit.value.vm_name
-      dns_server    = "192.168.1.13"
-      dns_port      = 5353
-      key_name      = "ddnskey."
-      key_algorithm = "hmac-sha512"
-      vm_unit_path  = "../proxmox-vm"
-      vm_identifier = unit.key  # Tells DNS unit which VM to get IP from
-    }
+  values = {
+    zone          = "home.sflab.io."
+    name          = local.vms["web01"].vm_name
+    dns_server    = "192.168.1.13"
+    dns_port      = 5353
+    key_name      = "ddnskey."
+    key_algorithm = "hmac-sha512"
+    vm_unit_path  = "../proxmox-vm"
+    vm_identifier = "web01"  # Tells DNS unit which VM to get IP from
+  }
+}
+
+unit "dns_web02" {
+  source = "./units/dns"
+  path   = "dns-web02"
+
+  values = {
+    zone          = "home.sflab.io."
+    name          = local.vms["web02"].vm_name
+    dns_server    = "192.168.1.13"
+    dns_port      = 5353
+    key_name      = "ddnskey."
+    key_algorithm = "hmac-sha512"
+    vm_unit_path  = "../proxmox-vm"
+    vm_identifier = "web02"
+  }
+}
+
+unit "dns_db01" {
+  source = "./units/dns"
+  path   = "dns-db01"
+
+  values = {
+    zone          = "home.sflab.io."
+    name          = local.vms["db01"].vm_name
+    dns_server    = "192.168.1.13"
+    dns_port      = 5353
+    key_name      = "ddnskey."
+    key_algorithm = "hmac-sha512"
+    vm_unit_path  = "../proxmox-vm"
+    vm_identifier = "db01"
   }
 }
 ```
@@ -476,20 +507,42 @@ dig database-01.home.sflab.io @192.168.1.13 -p 5353
 
 **Adding or Removing VMs:**
 
-To add a new VM, simply add it to the `vms` map:
+To add a new VM:
 
-```hcl
-vms = {
-  # ... existing VMs ...
-  "app01" = {
-    vm_name = "app-server-01"
-    memory  = 2048
-    cores   = 2
-  }
-}
-```
+1. Add it to the `vms` map:
+   ```hcl
+   vms = {
+     # ... existing VMs ...
+     "app01" = {
+       vm_name = "app-server-01"
+       memory  = 2048
+       cores   = 2
+     }
+   }
+   ```
 
-Then run `terragrunt stack run apply` to create the new VM and its DNS record.
+2. Add a corresponding DNS unit block:
+   ```hcl
+   unit "dns_app01" {
+     source = "./units/dns"
+     path   = "dns-app01"
+
+     values = {
+       zone          = "home.sflab.io."
+       name          = local.vms["app01"].vm_name
+       dns_server    = "192.168.1.13"
+       dns_port      = 5353
+       key_name      = "ddnskey."
+       key_algorithm = "hmac-sha512"
+       vm_unit_path  = "../proxmox-vm"
+       vm_identifier = "app01"
+     }
+   }
+   ```
+
+3. Run `terragrunt stack run apply` to create the new VM and its DNS record.
+
+**Note:** Terragrunt stack files don't support dynamic block generation, so DNS units must be manually defined for each VM.
 
 For local testing, create example stacks in `examples/terragrunt/stacks/` with local unit wrappers that use relative paths to modules.
 
