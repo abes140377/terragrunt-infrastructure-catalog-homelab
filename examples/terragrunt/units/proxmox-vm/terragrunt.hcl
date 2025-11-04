@@ -6,7 +6,7 @@ locals {
   provider_config    = read_terragrunt_config(find_in_parent_folders("provider-config.hcl"))
 
   proxmox_endpoint = "https://${local.provider_config.locals.proxmox_host}:${local.provider_config.locals.proxmox_port}/"
-  proxmox_insecure
+  proxmox_insecure = local.provider_config.locals.proxmox_insecure
 }
 
 # Generate Proxmox provider block
