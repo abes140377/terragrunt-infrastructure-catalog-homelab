@@ -17,10 +17,18 @@ terraform {
   source = "git::git@github.com:abes140377/terragrunt-infrastructure-catalog-homelab.git//modules/proxmox-vm?ref=${values.version}"
 }
 
-inputs = {
-  # Required inputs
-  vm_name = values.vm_name
+locals {
+  # If a global pool_id is provided at the unit level, merge it into each VM configuration
+  # that doesn't already specify its own pool_id
+  global_pool_id = try(values.pool_id, "")
+  vms_with_pool = local.global_pool_id != "" ? {
+    for k, vm in values.vms : k => merge(vm, {
+      pool_id = try(vm.pool_id, local.global_pool_id)
+    })
+  } : values.vms
+}
 
-  # Optional inputs
-  pool_id = try(values.pool_id, "")
+inputs = {
+  # Map of VMs to create
+  vms = local.vms_with_pool
 }

@@ -394,6 +394,103 @@ terragrunt stack run apply
 dig example-stack-container.home.sflab.io @192.168.1.13 -p 5353
 ```
 
+**Multi-VM Stack Example:**
+
+The `homelab-proxmox-vm` stack supports deploying multiple VMs with DNS registration using a map-based configuration:
+
+```hcl
+# examples/terragrunt/stacks/homelab-proxmox-vm/terragrunt.stack.hcl
+locals {
+  pool_id = "example-multi-vm-pool"
+
+  # Define multiple VMs with their configurations
+  vms = {
+    "web01" = {
+      vm_name = "web-server-01"
+      memory  = 4096
+    }
+    "web02" = {
+      vm_name = "web-server-02"
+      memory  = 4096
+    }
+    "db01" = {
+      vm_name = "database-01"
+      memory  = 8192
+    }
+  }
+}
+
+unit "proxmox_vm" {
+  source = "./units/proxmox-vm"
+  path   = "proxmox-vm"
+
+  values = {
+    vms    = local.vms
+    pool_id = local.pool_id
+  }
+}
+
+# Create DNS A records for each VM using dynamic unit generation
+dynamic "unit" {
+  for_each = local.vms
+
+  content {
+    source = "./units/dns"
+    path   = "dns-${unit.key}"  # Creates dns-web01, dns-web02, dns-db01
+
+    values = {
+      zone          = "home.sflab.io."
+      name          = unit.value.vm_name
+      dns_server    = "192.168.1.13"
+      dns_port      = 5353
+      key_name      = "ddnskey."
+      key_algorithm = "hmac-sha512"
+      vm_unit_path  = "../proxmox-vm"
+      vm_identifier = unit.key  # Tells DNS unit which VM to get IP from
+    }
+  }
+}
+```
+
+**Deploying a Multi-VM Stack:**
+
+```bash
+# Set required environment variables
+export AWS_ACCESS_KEY_ID="your-minio-access-key"
+export AWS_SECRET_ACCESS_KEY="your-minio-secret-key"
+export PROXMOX_VE_API_TOKEN="root@pam!tofu=xxxxxxxx"
+export TF_VAR_dns_key_secret="your-tsig-key-secret"
+
+# Navigate to stack directory
+cd examples/terragrunt/stacks/homelab-proxmox-vm
+
+# Generate and deploy stack
+terragrunt stack generate
+terragrunt stack run apply
+
+# Verify DNS resolution for all VMs (note: DNS server runs on port 5353)
+dig web-server-01.home.sflab.io @192.168.1.13 -p 5353
+dig web-server-02.home.sflab.io @192.168.1.13 -p 5353
+dig database-01.home.sflab.io @192.168.1.13 -p 5353
+```
+
+**Adding or Removing VMs:**
+
+To add a new VM, simply add it to the `vms` map:
+
+```hcl
+vms = {
+  # ... existing VMs ...
+  "app01" = {
+    vm_name = "app-server-01"
+    memory  = 2048
+    cores   = 2
+  }
+}
+```
+
+Then run `terragrunt stack run apply` to create the new VM and its DNS record.
+
 For local testing, create example stacks in `examples/terragrunt/stacks/` with local unit wrappers that use relative paths to modules.
 
 ### Passing Variables to Modules
@@ -469,15 +566,28 @@ Current modules support:
   - Disk: 8GB on `local-lvm` datastore
   - Unprivileged containers by default
   - Outputs: `ipv4` (container IP address)
-- **Virtual Machines** (`modules/proxmox-vm`): Full VMs on Proxmox via template cloning
-  - Resource: `proxmox_virtual_environment_vm`
-  - Required inputs: `vm_name` (string)
-  - Optional inputs: `pool_id` (string, default: "")
+- **Virtual Machines** (`modules/proxmox-vm`): Full VMs on Proxmox via template cloning with multi-VM support
+  - Resource: `proxmox_virtual_environment_vm` (with `for_each` for multiple VMs)
+  - Required inputs: `vms` (map of VM configurations)
+  - Map structure:
+    ```hcl
+    vms = {
+      "web01" = {
+        vm_name = "web-server-01"
+        memory  = 4096            # Optional, default: 2048
+        cores   = 2               # Optional, default: 2
+        pool_id = "web-pool"      # Optional, default: ""
+      }
+      "db01" = {
+        vm_name = "database-01"
+        memory  = 8192
+      }
+    }
+    ```
   - Configuration: Clones from template VM 9002 on `pve1` node
-  - Memory: 2048MB dedicated
   - Network: DHCP IPv4 configuration
   - Agent: QEMU guest agent enabled for IP address retrieval
-  - Outputs: `ipv4` (VM IP address)
+  - Outputs: `vms` (map of VM attributes with id, name, and ipv4 for each VM)
 - **Resource Pools** (`modules/proxmox-pool`): For organizing Proxmox resources
   - Resource: `proxmox_virtual_environment_pool`
   - Required inputs: `pool_id` (string)
