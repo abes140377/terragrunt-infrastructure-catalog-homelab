@@ -1,5 +1,5 @@
 locals {
-  s3_backend_vars = read_terragrunt_config(find_in_parent_folders("s3-backend.hcl"))
+  s3_backend_vars = read_terragrunt_config(find_in_parent_folders("backend-config.hcl"))
 
   s3_backend_prefix                      = local.s3_backend_vars.locals.prefix
   s3_backend_region                      = local.s3_backend_vars.locals.region

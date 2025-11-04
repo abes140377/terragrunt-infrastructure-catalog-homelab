@@ -42,7 +42,7 @@ This repo is a Terragrunt infrastructure catalog for homelab Proxmox environment
 ## References
 
 - See `CLAUDE.md` and `openspec/AGENTS.md` for authoritative spec, change proposal, and architecture guidance.
-- Example files: `examples/terragrunt/root.hcl`, `examples/terragrunt/s3-backend.hcl`, `examples/terragrunt/provider.hcl`, `modules/*`, `units/*`, `stacks/*`.
+- Example files: `examples/terragrunt/root.hcl`, `examples/terragrunt/backend-config.hcl`, `examples/terragrunt/provider-config.hcl`, `modules/*`, `units/*`, `stacks/*`.
 
 ## Quickstart
 

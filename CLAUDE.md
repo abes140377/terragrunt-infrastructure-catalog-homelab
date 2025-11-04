@@ -90,17 +90,17 @@ Units and stacks use Git URLs in their `source` field because they are designed 
 **Root Configuration** (`examples/terragrunt/root.hcl`):
 
 - Defines shared locals for S3 backend and provider configuration
-- Reads from `s3-backend.hcl` and `provider.hcl`
+- Reads from `backend-config.hcl` and `provider-config.hcl`
 - Generates `backend.tf` and `provider.tf` for all child modules
 - All units must include this via `include "root"`
 
-**Backend Configuration** (`examples/terragrunt/s3-backend.hcl`):
+**Backend Configuration** (`examples/terragrunt/backend-config.hcl`):
 
 - Uses MinIO as S3-compatible backend
 - Requires environment variables: `AWS_ACCESS_KEY_ID` and `AWS_SECRET_ACCESS_KEY`
 - Endpoint: `http://minio.home.sflab.io:9000`
 
-**Provider Configuration** (`examples/terragrunt/provider.hcl`):
+**Provider Configuration** (`examples/terragrunt/provider-config.hcl`):
 
 - Configures bpg/proxmox provider (>= 0.69.0)
 - Default host: `proxmox.home.sflab.io:8006`

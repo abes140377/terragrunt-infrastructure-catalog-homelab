@@ -79,14 +79,16 @@ unit "dns_web01" {
   path   = "dns-web01"
 
   values = {
-    zone          = "home.sflab.io."
     name          = local.vms["web01"].vm_name
-    dns_server    = "192.168.1.13"
-    dns_port      = 5353
-    key_name      = "ddnskey."
-    key_algorithm = "hmac-sha512"
-    vm_unit_path  = "../proxmox-vm"
     vm_identifier = "web01" # Tells DNS unit which VM in the map to get IP from
+
+    # zone          = "home.sflab.io."
+    # dns_server    = "192.168.1.13"
+    # dns_port      = 5353
+    # key_name      = "ddnskey."
+    # key_algorithm = "hmac-sha512"
+
+    vm_unit_path  = "../proxmox-vm"
   }
 }
 
@@ -98,14 +100,16 @@ unit "dns_web02" {
   path   = "dns-web02"
 
   values = {
-    zone          = "home.sflab.io."
     name          = local.vms["web02"].vm_name
-    dns_server    = "192.168.1.13"
-    dns_port      = 5353
-    key_name      = "ddnskey."
-    key_algorithm = "hmac-sha512"
-    vm_unit_path  = "../proxmox-vm"
     vm_identifier = "web02"
+
+    # zone          = "home.sflab.io."
+    # dns_server    = "192.168.1.13"
+    # dns_port      = 5353
+    # key_name      = "ddnskey."
+    # key_algorithm = "hmac-sha512"
+
+    vm_unit_path  = "../proxmox-vm"
   }
 }
 
@@ -117,13 +121,15 @@ unit "dns_db01" {
   path   = "dns-db01"
 
   values = {
-    zone          = "home.sflab.io."
     name          = local.vms["db01"].vm_name
-    dns_server    = "192.168.1.13"
-    dns_port      = 5353
-    key_name      = "ddnskey."
-    key_algorithm = "hmac-sha512"
-    vm_unit_path  = "../proxmox-vm"
     vm_identifier = "db01"
+
+    # zone          = "home.sflab.io."
+    # dns_server    = "192.168.1.13"
+    # dns_port      = 5353
+    # key_name      = "ddnskey."
+    # key_algorithm = "hmac-sha512"
+
+    vm_unit_path  = "../proxmox-vm"
   }
 }

@@ -48,8 +48,8 @@ This is a Terragrunt infrastructure catalog for homelab Proxmox environments. It
 
 **Configuration Hierarchy:**
 - **Root Configuration** (`examples/terragrunt/root.hcl`): Shared locals for S3 backend and provider configuration
-- **Backend Configuration** (`examples/terragrunt/s3-backend.hcl`): MinIO S3-compatible backend settings
-- **Provider Configuration** (`examples/terragrunt/provider.hcl`): bpg/proxmox provider configuration
+- **Backend Configuration** (`examples/terragrunt/backend-config.hcl`): MinIO S3-compatible backend settings
+- **Provider Configuration** (`examples/terragrunt/provider-config.hcl`): bpg/proxmox provider configuration
 
 **Dependency Pattern:**
 - Units in `examples/` can use `dependency` blocks to reference other units

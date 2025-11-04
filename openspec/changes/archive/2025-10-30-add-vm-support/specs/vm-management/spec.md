@@ -58,7 +58,7 @@ The catalog SHALL provide an example configuration demonstrating VM unit usage w
 
 - **WHEN** the example is configured
 - **THEN** it SHALL generate the Proxmox provider configuration block
-- **AND** read provider settings from `provider.hcl`
+- **AND** read provider settings from `provider-config.hcl`
 - **AND** enable SSH agent support
 
 #### Scenario: Example pool dependency

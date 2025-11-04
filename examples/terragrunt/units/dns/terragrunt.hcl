@@ -2,6 +2,15 @@ include "root" {
   path = find_in_parent_folders("root.hcl")
 }
 
+locals {
+  dns_config_vars = read_terragrunt_config(find_in_parent_folders("dns-config.hcl"))
+
+  dns_server    = "${local.dns_config_vars.locals.dns_server}"
+  dns_port      = "${local.dns_config_vars.locals.dns_port}"
+  key_name      = "${local.dns_config_vars.locals.key_name}"
+  key_algorithm = "${local.dns_config_vars.locals.key_algorithm}"
+}
+
 # Generate DNS provider block with TSIG configuration
 generate "provider" {
   path      = "provider.tf"
@@ -9,10 +18,10 @@ generate "provider" {
   contents  = <<EOF
 provider "dns" {
   update {
-    server        = "192.168.1.13"
-    port          = 5353
-    key_name      = "ddnskey."
-    key_algorithm = "hmac-sha512"
+    server        = "${local.dns_server}"
+    port          = "${local.dns_port}"
+    key_name      = "${local.key_name}"
+    key_algorithm = "${local.key_algorithm}"
     key_secret    = "${get_env("TF_VAR_dns_key_secret", "mock-secret-for-testing")}"
   }
 }
