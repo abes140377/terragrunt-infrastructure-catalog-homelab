@@ -61,6 +61,9 @@ inputs = {
   # Required inputs
   zone = values.zone
   name = values.name
+
+  # Optional inputs
+
   # Extract specific VM IP if vm_identifier is provided (multi-VM pattern)
   # Otherwise, fall back to single-VM pattern (ipv4 output)
   # If neither is available, try using provided addresses value

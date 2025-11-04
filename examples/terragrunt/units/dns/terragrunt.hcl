@@ -3,12 +3,12 @@ include "root" {
 }
 
 locals {
-  dns_config_vars = read_terragrunt_config(find_in_parent_folders("dns-config.hcl"))
+  dns_config = read_terragrunt_config(find_in_parent_folders("dns-config.hcl"))
 
-  dns_server    = "${local.dns_config_vars.locals.dns_server}"
-  dns_port      = "${local.dns_config_vars.locals.dns_port}"
-  key_name      = "${local.dns_config_vars.locals.key_name}"
-  key_algorithm = "${local.dns_config_vars.locals.key_algorithm}"
+  dns_server    = "${local.dns_config.locals.dns_server}"
+  dns_port      = "${local.dns_config.locals.dns_port}"
+  key_name      = "${local.dns_config.locals.key_name}"
+  key_algorithm = "${local.dns_config.locals.key_algorithm}"
 }
 
 # Generate DNS provider block with TSIG configuration

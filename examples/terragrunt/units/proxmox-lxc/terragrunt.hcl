@@ -3,9 +3,10 @@ include "root" {
 }
 
 locals {
-  provider_vars = read_terragrunt_config(find_in_parent_folders("provider-config.hcl"))
+  provider_config = read_terragrunt_config(find_in_parent_folders("provider-config.hcl"))
 
-  proxmox_endpoint = "https://${local.provider_vars.locals.proxmox_host}:${local.provider_vars.locals.proxmox_port}/"
+  proxmox_endpoint = "https://${local.provider_config.locals.proxmox_host}:${local.provider_config.locals.proxmox_port}/"
+  proxmox_insecure = local.provider_config.locals.proxmox_insecure
 }
 
 # Generate Proxmox provider block
@@ -15,7 +16,7 @@ generate "provider" {
   contents  = <<EOF
 provider "proxmox" {
   endpoint  = "${local.proxmox_endpoint}"
-  insecure  = true
+  insecure  = ${local.proxmox_insecure}
 
   ssh {
     agent = true
@@ -56,6 +57,9 @@ dependency "proxmox_pool" {
 }
 
 inputs = {
+  # Required inputs
   hostname = "example-terragrunt-units-proxmox-lxc"
+
+  # Derived inputs
   pool_id  = dependency.proxmox_pool.outputs.pool_id
 }
