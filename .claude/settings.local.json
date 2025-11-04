@@ -9,7 +9,9 @@
       "Bash(terragrunt init:*)",
       "Bash(openspec validate:*)",
       "Bash(tree:*)",
-      "Bash(pre-commit run:*)"
+      "Bash(pre-commit run:*)",
+      "mcp__Ref__ref_search_documentation",
+      "mcp__Ref__ref_read_url"
     ],
     "deny": [],
     "ask": []
