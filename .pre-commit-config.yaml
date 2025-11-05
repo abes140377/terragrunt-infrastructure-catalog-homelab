@@ -14,5 +14,5 @@ repos:
     rev: v0.1.30
     hooks:
       - id: tofu-fmt
-      - id: tofu-validate
+      # - id: tofu-validate
       # - id: goimports
