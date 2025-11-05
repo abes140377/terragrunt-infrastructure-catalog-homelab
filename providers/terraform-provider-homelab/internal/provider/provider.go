@@ -1,101 +1,102 @@
-// Copyright (c) HashiCorp, Inc.
-// SPDX-License-Identifier: MPL-2.0
-
 package provider
 
 import (
-	"context"
-	"net/http"
+    "context"
+    "os"
 
-	"github.com/hashicorp/terraform-plugin-framework/datasource"
-	"github.com/hashicorp/terraform-plugin-framework/ephemeral"
-	"github.com/hashicorp/terraform-plugin-framework/function"
-	"github.com/hashicorp/terraform-plugin-framework/provider"
-	"github.com/hashicorp/terraform-plugin-framework/provider/schema"
-	"github.com/hashicorp/terraform-plugin-framework/resource"
-	"github.com/hashicorp/terraform-plugin-framework/types"
+    "github.com/hashicorp/terraform-plugin-framework/datasource"
+    "github.com/hashicorp/terraform-plugin-framework/provider"
+    "github.com/hashicorp/terraform-plugin-framework/provider/schema"
+    "github.com/hashicorp/terraform-plugin-framework/resource"
+    "github.com/hashicorp/terraform-plugin-framework/types"
+
+    "terraform-provider-company/internal/provider/client"
 )
 
-// Ensure ScaffoldingProvider satisfies various provider interfaces.
-var _ provider.Provider = &ScaffoldingProvider{}
-var _ provider.ProviderWithFunctions = &ScaffoldingProvider{}
-var _ provider.ProviderWithEphemeralResources = &ScaffoldingProvider{}
+var _ provider.Provider = &CompanyProvider{}
 
-// ScaffoldingProvider defines the provider implementation.
-type ScaffoldingProvider struct {
-	// version is set to the provider version on release, "dev" when the
-	// provider is built and ran locally, and "test" when running acceptance
-	// testing.
-	version string
+type CompanyProvider struct {
+    version string
 }
 
-// ScaffoldingProviderModel describes the provider data model.
-type ScaffoldingProviderModel struct {
-	Endpoint types.String `tfsdk:"endpoint"`
-}
-
-func (p *ScaffoldingProvider) Metadata(ctx context.Context, req provider.MetadataRequest, resp *provider.MetadataResponse) {
-	resp.TypeName = "scaffolding"
-	resp.Version = p.version
-}
-
-func (p *ScaffoldingProvider) Schema(ctx context.Context, req provider.SchemaRequest, resp *provider.SchemaResponse) {
-	resp.Schema = schema.Schema{
-		Attributes: map[string]schema.Attribute{
-			"endpoint": schema.StringAttribute{
-				MarkdownDescription: "Example provider attribute",
-				Optional:            true,
-			},
-		},
-	}
-}
-
-func (p *ScaffoldingProvider) Configure(ctx context.Context, req provider.ConfigureRequest, resp *provider.ConfigureResponse) {
-	var data ScaffoldingProviderModel
-
-	resp.Diagnostics.Append(req.Config.Get(ctx, &data)...)
-
-	if resp.Diagnostics.HasError() {
-		return
-	}
-
-	// Configuration values are now available.
-	// if data.Endpoint.IsNull() { /* ... */ }
-
-	// Example client configuration for data sources and resources
-	client := http.DefaultClient
-	resp.DataSourceData = client
-	resp.ResourceData = client
-}
-
-func (p *ScaffoldingProvider) Resources(ctx context.Context) []func() resource.Resource {
-	return []func() resource.Resource{
-		NewExampleResource,
-	}
-}
-
-func (p *ScaffoldingProvider) EphemeralResources(ctx context.Context) []func() ephemeral.EphemeralResource {
-	return []func() ephemeral.EphemeralResource{
-		NewExampleEphemeralResource,
-	}
-}
-
-func (p *ScaffoldingProvider) DataSources(ctx context.Context) []func() datasource.DataSource {
-	return []func() datasource.DataSource{
-		NewExampleDataSource,
-	}
-}
-
-func (p *ScaffoldingProvider) Functions(ctx context.Context) []func() function.Function {
-	return []func() function.Function{
-		NewExampleFunction,
-	}
+type CompanyProviderModel struct {
+    CMDBEndpoint types.String `tfsdk:"cmdb_endpoint"`
+    CMDBToken    types.String `tfsdk:"cmdb_token"`
 }
 
 func New(version string) func() provider.Provider {
-	return func() provider.Provider {
-		return &ScaffoldingProvider{
-			version: version,
-		}
-	}
+    return func() provider.Provider {
+        return &CompanyProvider{
+            version: version,
+        }
+    }
+}
+
+func (p *CompanyProvider) Metadata(ctx context.Context, req provider.MetadataRequest, resp *provider.MetadataResponse) {
+    resp.TypeName = "company"
+    resp.Version = p.version
+}
+
+func (p *CompanyProvider) Schema(ctx context.Context, req provider.SchemaRequest, resp *provider.SchemaResponse) {
+    resp.Schema = schema.Schema{
+        Description: "Provider for company VM naming and CMDB integration",
+        Attributes: map[string]schema.Attribute{
+            "cmdb_endpoint": schema.StringAttribute{
+                Description: "CMDB API endpoint URL",
+                Optional:    true,
+            },
+            "cmdb_token": schema.StringAttribute{
+                Description: "CMDB API authentication token",
+                Optional:    true,
+                Sensitive:   true,
+            },
+        },
+    }
+}
+
+func (p *CompanyProvider) Configure(ctx context.Context, req provider.ConfigureRequest, resp *provider.ConfigureResponse) {
+    var config CompanyProviderModel
+
+    resp.Diagnostics.Append(req.Config.Get(ctx, &config)...)
+    if resp.Diagnostics.HasError() {
+        return
+    }
+
+    // Fallback auf Environment Variables
+    endpoint := os.Getenv("CMDB_ENDPOINT")
+    token := os.Getenv("CMDB_TOKEN")
+
+    if !config.CMDBEndpoint.IsNull() {
+        endpoint = config.CMDBEndpoint.ValueString()
+    }
+
+    if !config.CMDBToken.IsNull() {
+        token = config.CMDBToken.ValueString()
+    }
+
+    if endpoint == "" {
+        resp.Diagnostics.AddError(
+            "Missing CMDB Endpoint",
+            "The provider requires a CMDB endpoint. Set it via provider config or CMDB_ENDPOINT environment variable.",
+        )
+        return
+    }
+
+    // CMDB Client initialisieren
+    cmdbClient := client.NewCMDBClient(endpoint, token)
+
+    resp.DataSourceData = cmdbClient
+    resp.ResourceData = cmdbClient
+}
+
+func (p *CompanyProvider) DataSources(ctx context.Context) []func() datasource.DataSource {
+    return []func() datasource.DataSource{
+        NewNamingDataSource,
+    }
+}
+
+func (p *CompanyProvider) Resources(ctx context.Context) []func() resource.Resource {
+    return []func() resource.Resource{
+        NewCMDBEntryResource,
+    }
 }
