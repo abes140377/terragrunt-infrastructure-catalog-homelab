@@ -414,155 +414,56 @@ terragrunt stack run apply
 dig example-stack-container.home.sflab.io @192.168.1.13 -p 5353
 ```
 
-**Multi-VM Stack Example:**
+**Deploying Multiple VMs:**
 
-The `homelab-proxmox-vm` stack supports deploying multiple VMs with DNS registration using a map-based configuration:
+The proxmox-vm module follows a single-VM pattern (matching proxmox-lxc). To deploy multiple VMs:
 
-```hcl
-# examples/terragrunt/stacks/homelab-proxmox-vm/terragrunt.stack.hcl
-locals {
-  pool_id = "example-multi-vm-pool"
-
-  # Define multiple VMs with their configurations
-  vms = {
-    "web01" = {
-      vm_name = "web-server-01"
-      memory  = 4096
-    }
-    "web02" = {
-      vm_name = "web-server-02"
-      memory  = 4096
-    }
-    "db01" = {
-      vm_name = "database-01"
-      memory  = 8192
-    }
-  }
-}
-
-unit "proxmox_vm" {
-  source = "./units/proxmox-vm"
-  path   = "proxmox-vm"
-
-  values = {
-    vms    = local.vms
-    pool_id = local.pool_id
-  }
-}
-
-# Create DNS A records for each VM
-# Note: Terragrunt stack files don't support dynamic blocks,
-# so each DNS unit must be manually defined
-
-unit "dns_web01" {
-  source = "./units/dns"
-  path   = "dns-web01"
-
-  values = {
-    zone          = "home.sflab.io."
-    name          = local.vms["web01"].vm_name
-    dns_server    = "192.168.1.13"
-    dns_port      = 5353
-    key_name      = "ddnskey."
-    key_algorithm = "hmac-sha512"
-    vm_unit_path  = "../proxmox-vm"
-    vm_identifier = "web01"  # Tells DNS unit which VM to get IP from
-  }
-}
-
-unit "dns_web02" {
-  source = "./units/dns"
-  path   = "dns-web02"
-
-  values = {
-    zone          = "home.sflab.io."
-    name          = local.vms["web02"].vm_name
-    dns_server    = "192.168.1.13"
-    dns_port      = 5353
-    key_name      = "ddnskey."
-    key_algorithm = "hmac-sha512"
-    vm_unit_path  = "../proxmox-vm"
-    vm_identifier = "web02"
-  }
-}
-
-unit "dns_db01" {
-  source = "./units/dns"
-  path   = "dns-db01"
-
-  values = {
-    zone          = "home.sflab.io."
-    name          = local.vms["db01"].vm_name
-    dns_server    = "192.168.1.13"
-    dns_port      = 5353
-    key_name      = "ddnskey."
-    key_algorithm = "hmac-sha512"
-    vm_unit_path  = "../proxmox-vm"
-    vm_identifier = "db01"
-  }
-}
-```
-
-**Deploying a Multi-VM Stack:**
-
-```bash
-# Set required environment variables
-export AWS_ACCESS_KEY_ID="your-minio-access-key"
-export AWS_SECRET_ACCESS_KEY="your-minio-secret-key"
-export PROXMOX_VE_API_TOKEN="root@pam!tofu=xxxxxxxx"
-export TF_VAR_dns_key_secret="your-tsig-key-secret"
-
-# Navigate to stack directory
-cd examples/terragrunt/stacks/homelab-proxmox-vm
-
-# Generate and deploy stack
-terragrunt stack generate
-terragrunt stack run apply
-
-# Verify DNS resolution for all VMs (note: DNS server runs on port 5353)
-dig web-server-01.home.sflab.io @192.168.1.13 -p 5353
-dig web-server-02.home.sflab.io @192.168.1.13 -p 5353
-dig database-01.home.sflab.io @192.168.1.13 -p 5353
-```
-
-**Adding or Removing VMs:**
-
-To add a new VM:
-
-1. Add it to the `vms` map:
+1. **Option 1: Multiple Stack Units** - Create separate VM and DNS units for each VM in your stack:
    ```hcl
-   vms = {
-     # ... existing VMs ...
-     "app01" = {
-       vm_name = "app-server-01"
-       memory  = 2048
-       cores   = 2
-     }
-   }
-   ```
-
-2. Add a corresponding DNS unit block:
-   ```hcl
-   unit "dns_app01" {
-     source = "./units/dns"
-     path   = "dns-app01"
-
+   # Stack with multiple VMs
+   unit "proxmox_vm_web" {
+     source = "./units/proxmox-vm"
+     path   = "proxmox-vm-web"
      values = {
-       zone          = "home.sflab.io."
-       name          = local.vms["app01"].vm_name
-       dns_server    = "192.168.1.13"
-       dns_port      = 5353
-       key_name      = "ddnskey."
-       key_algorithm = "hmac-sha512"
-       vm_unit_path  = "../proxmox-vm"
-       vm_identifier = "app01"
+       vm_name = "web-server"
+       memory  = 4096
+       pool_id = local.pool_id
+     }
+   }
+
+   unit "proxmox_vm_db" {
+     source = "./units/proxmox-vm"
+     path   = "proxmox-vm-db"
+     values = {
+       vm_name = "database"
+       memory  = 8192
+       pool_id = local.pool_id
+     }
+   }
+
+   # DNS units for each VM
+   unit "dns_web" {
+     source = "./units/dns"
+     path   = "dns-web"
+     values = {
+       name         = "web-server"
+       vm_unit_path = "../proxmox-vm-web"
+     }
+   }
+
+   unit "dns_db" {
+     source = "./units/dns"
+     path   = "dns-db"
+     values = {
+       name         = "database"
+       vm_unit_path = "../proxmox-vm-db"
      }
    }
    ```
 
-3. Run `terragrunt stack run apply` to create the new VM and its DNS record.
+2. **Option 2: Separate Deployments** - Deploy each VM as a separate stack instance
 
-**Note:** Terragrunt stack files don't support dynamic block generation, so DNS units must be manually defined for each VM.
+This pattern maintains consistency with the LXC module and simplifies configuration.
 
 For local testing, create example stacks in `examples/terragrunt/stacks/` with local unit wrappers that use relative paths to modules.
 
@@ -639,28 +540,17 @@ Current modules support:
   - Disk: 8GB on `local-lvm` datastore
   - Unprivileged containers by default
   - Outputs: `ipv4` (container IP address)
-- **Virtual Machines** (`modules/proxmox-vm`): Full VMs on Proxmox via template cloning with multi-VM support
-  - Resource: `proxmox_virtual_environment_vm` (with `for_each` for multiple VMs)
-  - Required inputs: `vms` (map of VM configurations)
-  - Map structure:
-    ```hcl
-    vms = {
-      "web01" = {
-        vm_name = "web-server-01"
-        memory  = 4096            # Optional, default: 2048
-        cores   = 2               # Optional, default: 2
-        pool_id = "web-pool"      # Optional, default: ""
-      }
-      "db01" = {
-        vm_name = "database-01"
-        memory  = 8192
-      }
-    }
-    ```
+- **Virtual Machines** (`modules/proxmox-vm`): Single VM deployment on Proxmox via template cloning
+  - Resource: `proxmox_virtual_environment_vm`
+  - Required inputs: `vm_name` (string)
+  - Optional inputs:
+    - `memory` (number, default: 2048) - Memory allocation in MB
+    - `cores` (number, default: 2) - CPU cores
+    - `pool_id` (string, default: "") - Proxmox pool for resource organization
   - Configuration: Clones from template VM 9002 on `pve1` node
   - Network: DHCP IPv4 configuration
   - Agent: QEMU guest agent enabled for IP address retrieval
-  - Outputs: `vms` (map of VM attributes with id, name, and ipv4 for each VM)
+  - Outputs: `ipv4` (VM IP address), `vm_id` (Proxmox VM ID), `vm_name` (VM name)
 - **Resource Pools** (`modules/proxmox-pool`): For organizing Proxmox resources
   - Resource: `proxmox_virtual_environment_pool`
   - Required inputs: `pool_id` (string)

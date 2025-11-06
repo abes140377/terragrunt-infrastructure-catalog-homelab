@@ -48,6 +48,10 @@ inputs = {
   # Required inputs
   vm_name = "example-terragrunt-units-proxmox-vm"
 
+  # Optional inputs
+  # memory = 4096  # Customize memory allocation (default: 2048MB)
+  # cores  = 4     # Customize CPU cores (default: 2)
+
   # Derived inputs
   pool_id = dependency.proxmox_pool.outputs.pool_id
 }

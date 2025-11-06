@@ -1,11 +1,7 @@
-# Create VMs using for_each to iterate over the vms map
-# Each VM is identified by its map key and can be independently managed
 resource "proxmox_virtual_environment_vm" "this" {
-  for_each = var.vms
-
-  name      = each.value.vm_name
+  name      = var.vm_name
   node_name = "pve1"
-  pool_id   = each.value.pool_id != "" ? each.value.pool_id : null
+  pool_id   = var.pool_id != "" ? var.pool_id : null
 
   clone {
     vm_id = 9002
@@ -20,8 +16,12 @@ resource "proxmox_virtual_environment_vm" "this" {
     enabled = true
   }
 
+  cpu {
+    cores = var.cores
+  }
+
   memory {
-    dedicated = each.value.memory
+    dedicated = var.memory
   }
 
   initialization {

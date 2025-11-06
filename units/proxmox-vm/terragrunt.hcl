@@ -18,12 +18,11 @@ terraform {
 }
 
 inputs = {
-  # Map of VMs to create
-  # If a global pool_id is provided at the unit level, merge it into each VM configuration
-  # that doesn't already specify its own pool_id
-  vms = try(values.pool_id, "") != "" ? {
-    for k, vm in values.vms : k => merge(vm, {
-      pool_id = try(vm.pool_id, values.pool_id)
-    })
-  } : values.vms
+  # Required inputs
+  vm_name = values.vm_name
+
+  # Optional inputs
+  memory  = try(values.memory, 2048)
+  cores   = try(values.cores, 2)
+  pool_id = try(values.pool_id, "")
 }

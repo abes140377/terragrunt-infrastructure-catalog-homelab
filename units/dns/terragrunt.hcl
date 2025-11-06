@@ -46,14 +46,9 @@ terraform {
 dependency "compute" {
   config_path = try(values.vm_unit_path, try(values.lxc_unit_path, ""))
 
-  # Mock outputs support both multi-VM and single-VM patterns
+  # Mock outputs support single-VM pattern (both VM and LXC)
   mock_outputs = {
-    vms = {
-      "mock" = {
-        ipv4 = "192.168.1.100"
-      }
-    }
-    ipv4 = "192.168.1.100" # Backwards compatibility with single-VM pattern
+    ipv4 = "192.168.1.100"
   }
 }
 
@@ -64,11 +59,9 @@ inputs = {
 
   # Optional inputs
 
-  # Extract specific VM IP if vm_identifier is provided (multi-VM pattern)
-  # Otherwise, fall back to single-VM pattern (ipv4 output)
-  # If neither is available, try using provided addresses value
+  # Extract IP from single-VM pattern (ipv4 output)
+  # If not available, try using provided addresses value
   addresses = try(
-    [dependency.compute.outputs.vms[values.vm_identifier].ipv4],
     [dependency.compute.outputs.ipv4],
     values.addresses,
     []

@@ -1,27 +1,22 @@
-variable "vms" {
-  description = <<-EOT
-    Map of VMs to create. Key is a unique VM identifier, value is VM configuration.
+variable "vm_name" {
+  description = "The name of the virtual machine."
+  type        = string
+}
 
-    Example:
-    vms = {
-      "web01" = {
-        vm_name = "web-server-01"
-        memory  = 4096
-        cores   = 2
-        pool_id = "web-pool"
-      }
-      "db01" = {
-        vm_name = "database-01"
-        memory  = 8192
-        cores   = 4
-      }
-    }
-  EOT
-  type = map(object({
-    vm_name = string
-    memory  = optional(number, 2048)
-    cores   = optional(number, 2)
-    pool_id = optional(string, "")
-  }))
-  default = {}
+variable "memory" {
+  description = "The amount of memory in MB allocated to the virtual machine."
+  type        = number
+  default     = 2048
+}
+
+variable "cores" {
+  description = "The number of CPU cores allocated to the virtual machine."
+  type        = number
+  default     = 2
+}
+
+variable "pool_id" {
+  description = "The ID of the Proxmox pool to which the virtual machine will be assigned."
+  type        = string
+  default     = ""
 }
