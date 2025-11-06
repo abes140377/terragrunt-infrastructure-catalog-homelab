@@ -1,0 +1,8 @@
+#!/usr/bin/env bash
+
+echo "MISE_ORIGINAL_CWD=${MISE_ORIGINAL_CWD}"
+echo "MISE_CONFIG_ROOT=${MISE_CONFIG_ROOT}"
+
+cd $MISE_CONFIG_ROOT/providers/terraform-provider-homelab
+
+go install .

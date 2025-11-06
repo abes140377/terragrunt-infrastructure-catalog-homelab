@@ -56,16 +56,16 @@ A custom Terraform provider offers:
 
 **Chosen**: Simple concatenation - complexity can be added later based on real-world needs
 
-### Decision: Monorepo Placement in `.providers/`
+### Decision: Monorepo Placement in `./providers/`
 
-**Why**: Keeping the provider in the same repository as the infrastructure catalog makes development easier during POC phase and keeps related code together. The `.providers/` directory clearly indicates custom/local providers vs external ones.
+**Why**: Keeping the provider in the same repository as the infrastructure catalog makes development easier during POC phase and keeps related code together. The `./providers/` directory clearly indicates custom/local providers vs external ones.
 
 **Alternatives considered**:
 - **Separate repository**: More standard for published providers, but adds overhead for POC
 - **Monorepo approach**: Simpler for development, easier to iterate
-- **Location choices**: `providers/`, `.providers/`, `tools/providers/`
+- **Location choices**: `./providers/`, `tools/providers/`
 
-**Chosen**: Monorepo in `.providers/` directory - the dot prefix indicates it's tooling/infrastructure
+**Chosen**: Monorepo in `./providers/` directory - the dot prefix indicates it's tooling/infrastructure
 
 ### Decision: Local Installation Only (No Registry)
 
@@ -112,11 +112,10 @@ A custom Terraform provider offers:
 ### Provider Structure
 
 ```
-.providers/terraform-provider-homelab/
+./providers/terraform-provider-homelab/
 ├── main.go                          # Provider server entry point
 ├── go.mod                           # Go module definition
 ├── go.sum                           # Dependency checksums
-├── GNUmakefile                      # Build automation
 ├── .goreleaser.yml                  # Release configuration (future)
 ├── .gitignore                       # Go and Terraform artifacts
 ├── README.md                        # Setup and usage docs
@@ -158,17 +157,17 @@ A custom Terraform provider offers:
 
 ### Local Development Workflow
 
-1. Developer runs `go install` in `.providers/terraform-provider-homelab/`
+1. Developer runs `go install` in `./providers/terraform-provider-homelab/`
 2. Binary installed to `$GOPATH/bin/terraform-provider-homelab`
 3. Developer configures `.terraformrc` with dev overrides:
-   ```hcl
-   provider_installation {
-     dev_overrides {
-       "registry.terraform.io/abes140377/homelab" = "/path/to/go/bin"
-     }
-     direct {}
-   }
-   ```
+```hcl
+  provider_installation {
+    dev_overrides {
+      "registry.terraform.io/abes140377/homelab" = "/path/to/go/bin"
+    }
+    direct {}
+  }
+```
 4. Terraform uses local binary instead of attempting registry download
 5. Developer can iterate on provider code and recompile as needed
 

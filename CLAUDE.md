@@ -90,7 +90,7 @@ Units and stacks use Git URLs in their `source` field because they are designed 
 **Root Configuration** (`examples/terragrunt/root.hcl`):
 
 - Defines shared locals for S3 backend and provider configuration
-- Reads from `backend-config.hcl` and `provider-config.hcl`
+- Reads from `backend-config.hcl`, `provider-config.hcl`, and `dns-config.hcl`
 - Generates `backend.tf` and `provider.tf` for all child modules
 - All units must include this via `include "root"`
 
@@ -106,6 +106,14 @@ Units and stacks use Git URLs in their `source` field because they are designed 
 - Default host: `proxmox.home.sflab.io:8006`
 - Uses `PROXMOX_VE_API_TOKEN` environment variable for authentication
 - SSH agent support enabled for advanced operations
+
+**DNS Configuration** (`examples/terragrunt/dns-config.hcl`):
+
+- Centralized DNS server configuration for all DNS units
+- Server: `192.168.1.13:5353`
+- TSIG key name: `ddnskey.`
+- Algorithm: `hmac-sha512`
+- Used by DNS units to configure the hashicorp/dns provider
 
 ## Common Commands
 
@@ -153,6 +161,18 @@ mise run terragrunt:stack:apply
 
 # Quick destroy for stacks (interactive selection menu)
 mise run terragrunt:stack:destroy
+
+# Build custom homelab provider
+mise run tofu:provider:build
+
+# Install custom homelab provider locally
+mise run tofu:provider:install
+
+# Lint custom homelab provider code
+mise run tofu:provider:lint
+
+# Test custom homelab provider naming example
+mise run tofu:provider:examples:naming:plan
 ```
 
 ### Terragrunt Operations
@@ -665,6 +685,60 @@ Current modules support:
     - Algorithm: `hmac-sha512`
     - Authentication: Uses TSIG (Transaction Signature) for secure dynamic DNS updates
     - Secret: Passed via `TF_VAR_dns_key_secret` environment variable
+
+### Custom Homelab Provider
+
+This repository includes a custom Terraform/OpenTofu provider for standardized resource naming conventions:
+
+**Provider Location**: `providers/terraform-provider-homelab/`
+
+**Features:**
+- **Standardized Naming**: Generates consistent names following the pattern `<env>-<app>`
+- **Type Safety**: Terraform validates inputs at plan time
+- **Zero Configuration**: No provider-level configuration required
+- **Extensible**: Foundation for future datasources, resources, and functions
+
+**Installation:**
+
+```bash
+# Build and install the provider locally
+mise run tofu:provider:install
+
+# Verify installation
+mise run tofu:provider:examples:naming:plan
+```
+
+**Usage Example:**
+
+```hcl
+terraform {
+  required_providers {
+    homelab = {
+      source = "registry.terraform.io/abes140377/homelab"
+    }
+  }
+}
+
+provider "homelab" {}
+
+# Generate a name for a development web server
+data "homelab_naming" "dev_web" {
+  env = "dev"
+  app = "web"
+}
+
+# Use the generated name
+output "resource_name" {
+  value = data.homelab_naming.dev_web.name  # Output: "dev-web"
+}
+```
+
+**Data Source: homelab_naming**
+- `env` (String, Required): Environment name (e.g., `dev`, `staging`, `prod`)
+- `app` (String, Required): Application name (e.g., `web`, `db`, `api`)
+- `name` (String, Output): Generated name following pattern `<env>-<app>`
+
+For detailed documentation, see `providers/terraform-provider-homelab/README.md`
 
 ### Provider Migration Notes
 

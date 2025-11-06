@@ -1,0 +1,5 @@
+#!/usr/bin/env bash
+
+cd $MISE_CONFIG_ROOT/providers/terraform-provider-homelab/examples/data-sources/naming
+
+TF_CLI_CONFIG_FILE=.terraformrc tofu plan

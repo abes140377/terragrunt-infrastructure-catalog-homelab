@@ -1,0 +1,7 @@
+#!/usr/bin/env bash
+
+cd $MISE_CONFIG_ROOT/providers/terraform-provider-homelab
+
+go fmt .
+go vet .
+go mod tidy

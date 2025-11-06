@@ -51,7 +51,7 @@ The system SHALL organize the custom provider code in a standard Go project stru
 #### Scenario: Directory organization
 
 - **WHEN** the provider codebase is examined
-- **THEN** it contains `.providers/terraform-provider-homelab/` directory
+- **THEN** it contains `./providers/terraform-provider-homelab/` directory
 - **AND** it contains `main.go` as the provider entry point
 - **AND** it contains `internal/provider/` directory for provider logic
 - **AND** it contains `go.mod` and `go.sum` for dependency management
