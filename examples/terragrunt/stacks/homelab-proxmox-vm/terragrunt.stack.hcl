@@ -1,28 +1,16 @@
-# Single VM Deployment Stack Example
-#
-# This stack demonstrates deploying a single VM with DNS registration.
-# Uses local unit wrappers for testing with relative module paths.
-#
-# Required environment variables:
-# - AWS_ACCESS_KEY_ID: MinIO access key for Terragrunt backend
-# - AWS_SECRET_ACCESS_KEY: MinIO secret key for Terragrunt backend
-# - PROXMOX_VE_API_TOKEN: Proxmox API token (format: username@realm!tokenname=secret)
-# - TF_VAR_dns_key_secret: TSIG key secret for DNS updates
-#
-# Deployment commands:
-#   terragrunt stack generate
-#   terragrunt stack run apply
-#
-# Verification (note: DNS server runs on port 5353):
-#   dig example-stack-vm.home.sflab.io @192.168.1.13 -p 5353
-
 locals {
-  pool_id = "example-vm-pool"
+  pool_id = "example-stack-vm-pool"
   vm_name = "example-stack-vm"
 
   # Optional: Customize VM resources
   # memory = 4096  # Memory in MB (default: 2048)
   # cores  = 4     # CPU cores (default: 2)
+
+  zone          = "home.sflab.io."
+  dns_server    = "192.168.1.13"
+  dns_port      = 5353
+  key_name      = "ddnskey."
+  key_algorithm = "hmac-sha512"
 }
 
 # Create a resource pool for organizing VMs
@@ -47,6 +35,7 @@ unit "proxmox_vm" {
   values = {
     vm_name        = local.vm_name
     pool_id        = local.pool_id
+
     pool_unit_path = "../proxmox-pool"
 
     # Optional: Customize VM resources
@@ -64,13 +53,11 @@ unit "dns" {
 
   values = {
     name = local.vm_name
-
-    # DNS configuration
-    zone          = "home.sflab.io."
-    dns_server    = "192.168.1.13"
-    dns_port      = 5353
-    key_name      = "ddnskey."
-    key_algorithm = "hmac-sha512"
+    zone          = local.zone
+    dns_server    = local.dns_server
+    dns_port      = local.dns_port
+    key_name      = local.key_name
+    key_algorithm = local.key_algorithm
 
     vm_unit_path = "../proxmox-vm"
   }

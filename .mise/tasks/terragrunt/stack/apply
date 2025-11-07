@@ -1,25 +1,42 @@
 #!/usr/bin/env bash
 
-SCRIPT_DIR=$( cd -- "$( dirname -- "${BASH_SOURCE[0]}" )" &> /dev/null && pwd )
+set -e
 
-PROJECT_DIR="$SCRIPT_DIR/../../../.."
-STACKS_DIR="$PROJECT_DIR/examples/terragrunt/stacks"
+#USAGE arg "<target>" help="The target unit" default=""
+#USAGE flag "-d --dry-run" help="Show the commands without executing it"
 
-stack_dirs=()
-while IFS= read -r -d '' dir; do
-  stack_dirs+=("$(basename "$dir")")
-done < <(find "$STACKS_DIR" -mindepth 1 -maxdepth 1 -type d -print0)
+STACKS_DIR="$MISE_CONFIG_ROOT/examples/terragrunt/stacks"
 
-# Show a selection menu with gum to select a unit
-selected_stack=$(printf "%s\n" "${stack_dirs[@]}" | gum choose --header="Select a stack to operate on:")
+if [[ -z "${usage_target:-}" ]]; then
+  stack_dirs=()
+
+  while IFS= read -r -d '' dir; do
+    stack_dirs+=("$(basename "$dir")")
+  done < <(find "$STACKS_DIR" -mindepth 1 -maxdepth 1 -type d -print0)
+
+  selected_stack=$(printf "%s\n" "${stack_dirs[@]}" | gum choose --header="Select a stack to operate on:")
+else
+  selected_stack+=("${usage_target}")
+fi
 
 cd "$STACKS_DIR/$selected_stack"
 
-STACK_GENERATE_COMMAND="terragrunt stack generate"
+STACK_GENERATE_CMD="terragrunt stack generate"
 STACK_RUN_APPLY_CMD="terragrunt stack run apply"
 
-echo "Running: $STACK_GENERATE_COMMAND"
-$STACK_GENERATE_COMMAND
+echo ""
+echo "🚀 Executing..."
+echo "   Commands:"
+echo "     - $STACK_GENERATE_CMD"
+echo "     - $STACK_RUN_APPLY_CMD"
+echo "   Working directory: $(pwd)"
+echo ""
 
-echo "Running: $STACK_RUN_APPLY_CMD"
-$STACK_RUN_APPLY_CMD
+if [ "$usage_dry_run" = "true" ]; then
+  echo "Dry run mode. Command not executed."
+  exit 0
+fi
+
+eval $STACK_GENERATE_CMD
+
+eval $STACK_RUN_APPLY_CMD

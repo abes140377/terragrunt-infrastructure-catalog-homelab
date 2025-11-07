@@ -164,7 +164,7 @@ The catalog SHALL provide an example stack demonstrating single VM deployment wi
 
 - **WHEN** the example stack is configured
 - **THEN** it SHALL use concrete values in `locals`:
-  - `pool_id`: "example-vm-pool"
+  - `pool_id`: "example-stack-vm-pool"
   - `vm_name`: "example-stack-vm"
   - Optional: `memory`, `cores` for customization
 - **AND** demonstrate DNS configuration for home.sflab.io zone

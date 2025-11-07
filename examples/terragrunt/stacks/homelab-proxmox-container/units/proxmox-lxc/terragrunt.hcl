@@ -49,6 +49,7 @@ dependency "proxmox_pool" {
 }
 
 inputs = {
+  # Required inputs
   hostname = values.hostname
   pool_id  = try(values.pool_id, dependency.proxmox_pool.outputs.pool_id)
 }

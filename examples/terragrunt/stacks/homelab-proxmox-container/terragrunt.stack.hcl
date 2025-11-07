@@ -1,7 +1,14 @@
 locals {
   pool_id  = "example-stack-container-pool"
+
   hostname = "example-stack-container"
   password = "SecurePassword123!"
+
+  zone          = "home.sflab.io."
+  dns_server    = "192.168.1.13"
+  dns_port      = 5353
+  key_name      = "ddnskey."
+  key_algorithm = "hmac-sha512"
 }
 
 unit "proxmox_pool" {
@@ -25,6 +32,7 @@ unit "proxmox_lxc" {
     hostname        = local.hostname
     password        = local.password
     pool_id         = local.pool_id
+
     pool_unit_path  = "../proxmox-pool"
   }
 }
@@ -36,12 +44,13 @@ unit "dns" {
   path   = "dns"
 
   values = {
-    zone           = "home.sflab.io."
     name           = local.hostname
-    dns_server     = "192.168.1.13"
-    dns_port       = 5353
-    key_name       = "ddnskey."
-    key_algorithm  = "hmac-sha512"
+    zone           = local.zone
+    dns_server     = local.dns_server
+    dns_port       = local.dns_port
+    key_name       = local.key_name
+    key_algorithm  = local.key_algorithm
+
     lxc_unit_path  = "../proxmox-lxc"
   }
 }

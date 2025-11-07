@@ -1,4 +1,4 @@
 data "homelab_naming" "this" {
-  env = "staging"
-  app = "web"
+  env = var.env
+  app = var.app
 }

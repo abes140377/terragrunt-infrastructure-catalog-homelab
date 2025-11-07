@@ -2,24 +2,27 @@ include "root" {
   path = find_in_parent_folders("root.hcl")
 }
 
+locals {
+  dns_config = read_terragrunt_config(find_in_parent_folders("dns-config.hcl"))
+
+  dns_server    = "${local.dns_config.locals.dns_server}"
+  dns_port      = "${local.dns_config.locals.dns_port}"
+  key_name      = "${local.dns_config.locals.key_name}"
+  key_algorithm = "${local.dns_config.locals.key_algorithm}"
+}
+
 # Generate DNS provider block
 generate "provider" {
   path      = "provider.tf"
   if_exists = "overwrite_terragrunt"
   contents  = <<EOF
-variable "dns_key_secret" {
-  description = "TSIG key secret for DNS authentication"
-  type        = string
-  sensitive   = true
-}
-
 provider "dns" {
   update {
     server        = "${values.dns_server}"
-    port          = ${try(values.dns_port, 53)}
+    port          = "${local.dns_port}"
     key_name      = "${values.key_name}"
     key_algorithm = "${values.key_algorithm}"
-    key_secret    = var.dns_key_secret
+    key_secret    = "${get_env("TF_VAR_dns_key_secret", "mock-secret-for-testing")}"
   }
 }
 EOF
@@ -32,11 +35,11 @@ terraform {
 dependency "proxmox_vm" {
   config_path = try(values.vm_unit_path, "../proxmox-vm")
 
-  # Mock outputs support single-VM pattern
   mock_outputs = {
     ipv4 = "192.168.1.100"
   }
 }
+
 
 inputs = {
   zone = values.zone

@@ -151,7 +151,7 @@ The catalog SHALL provide an example stack demonstrating VM deployment with loca
 
 - **WHEN** the example stack is configured
 - **THEN** it SHALL use concrete values in `locals`:
-  - `pool_id`: "example-vm-pool"
+  - `pool_id`: "example-stack-vm-pool"
   - `vm_name`: "example-stack-vm"
 - **AND** demonstrate DNS configuration for home.sflab.io zone
 
