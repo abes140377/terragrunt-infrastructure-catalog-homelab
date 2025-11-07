@@ -3,23 +3,17 @@ include "root" {
 }
 
 # Dependencies - ensure DNS runs after VM or LXC is created
-dependencies {
-  paths = [
-    try(values.vm_unit_path, try(values.lxc_unit_path, ""))
-  ]
-}
+# dependencies {
+#   paths = [
+#     try(values.vm_unit_path, try(values.lxc_unit_path, ""))
+#   ]
+# }
 
 # Generate DNS provider block
 generate "provider" {
   path      = "provider.tf"
   if_exists = "overwrite_terragrunt"
   contents  = <<EOF
-variable "dns_key_secret" {
-  description = "TSIG key secret for DNS authentication"
-  type        = string
-  sensitive   = true
-}
-
 provider "dns" {
   update {
     server        = "${values.dns_server}"
@@ -27,6 +21,7 @@ provider "dns" {
     key_name      = "${values.key_name}"
     key_algorithm = "${values.key_algorithm}"
     key_secret    = var.dns_key_secret
+    key_secret    = "${get_env("TF_VAR_dns_key_secret", "mock-secret-for-testing")}"
   }
 }
 EOF
