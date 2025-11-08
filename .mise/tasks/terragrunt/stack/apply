@@ -21,22 +21,17 @@ fi
 
 cd "$STACKS_DIR/$selected_stack"
 
-STACK_GENERATE_CMD="terragrunt stack generate"
 STACK_RUN_APPLY_CMD="terragrunt stack run apply"
 
 echo ""
 echo "🚀 Executing..."
-echo "   Commands:"
-echo "     - $STACK_GENERATE_CMD"
-echo "     - $STACK_RUN_APPLY_CMD"
-echo "   Working directory: $(pwd)"
+echo "   Commands: $STACK_RUN_APPLY_CMD"
+echo "   Working dir: $(pwd)"
 echo ""
 
 if [ "$usage_dry_run" = "true" ]; then
   echo "Dry run mode. Command not executed."
   exit 0
 fi
-
-eval $STACK_GENERATE_CMD
 
 eval $STACK_RUN_APPLY_CMD

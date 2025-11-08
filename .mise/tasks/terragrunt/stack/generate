@@ -21,11 +21,11 @@ fi
 
 cd "$STACKS_DIR/$selected_stack"
 
-STACK_RUN_DESTROY_CMD="terragrunt stack run destroy"
+STACK_GENERATE_CMD="terragrunt stack generate"
 
 echo ""
 echo "🚀 Executing..."
-echo "   Commands: $STACK_RUN_DESTROY_CMD"
+echo "   Commands: $STACK_GENERATE_CMD"
 echo "   Working dir: $(pwd)"
 echo ""
 
@@ -34,4 +34,4 @@ if [ "$usage_dry_run" = "true" ]; then
   exit 0
 fi
 
-eval $STACK_RUN_DESTROY_CMD
+eval $STACK_GENERATE_CMD

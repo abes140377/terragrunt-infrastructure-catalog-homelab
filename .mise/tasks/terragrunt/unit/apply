@@ -26,7 +26,7 @@ TERRAGRUNT_APPLY_CMD="terragrunt apply --auto-approve"
 echo ""
 echo "🚀 Executing..."
 echo "   Command: $TERRAGRUNT_APPLY_CMD"
-echo "   Working directory: $(pwd)"
+echo "   Working dir: $(pwd)"
 echo ""
 
 if [ "$usage_dry_run" = "true" ]; then

@@ -26,7 +26,7 @@ TERRAGRUNT_DESTROY_CMD="terragrunt destroy"
 echo ""
 echo "🚀 Executing..."
 echo "   Commands: $TERRAGRUNT_DESTROY_CMD"
-echo "   Working directory: $(pwd)"
+echo "   Working dir: $(pwd)"
 echo ""
 
 if [ "$usage_dry_run" = "true" ]; then
