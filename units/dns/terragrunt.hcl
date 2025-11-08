@@ -2,13 +2,6 @@ include "root" {
   path = find_in_parent_folders("root.hcl")
 }
 
-# Dependencies - ensure DNS runs after VM or LXC is created
-# dependencies {
-#   paths = [
-#     try(values.vm_unit_path, try(values.lxc_unit_path, ""))
-#   ]
-# }
-
 # Generate DNS provider block
 generate "provider" {
   path      = "provider.tf"
