@@ -388,7 +388,6 @@ unit "proxmox_lxc" {
     hostname        = local.hostname
     password        = local.password
     pool_id         = local.pool_id
-    pool_unit_path  = "../proxmox-pool"
   }
 }
 

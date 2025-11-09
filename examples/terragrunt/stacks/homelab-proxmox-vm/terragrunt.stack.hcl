@@ -38,8 +38,6 @@ unit "proxmox_vm_1" {
     vm_name = "${local.vm_name}-1"
     pool_id = local.pool_id
 
-    # pool_unit_path = "../proxmox-pool"
-
     # Optional: Customize VM resources
     # memory = try(local.memory, 2048)
     # cores  = try(local.cores, 2)
@@ -56,8 +54,6 @@ unit "proxmox_vm_2" {
 
     vm_name = "${local.vm_name}-2"
     pool_id = local.pool_id
-
-    # pool_unit_path = "../proxmox-pool"
 
     # Optional: Customize VM resources
     # memory = try(local.memory, 2048)

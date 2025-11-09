@@ -35,8 +35,6 @@ unit "proxmox_lxc_1" {
     hostname = "${local.hostname}-1"
     password = local.password
     pool_id  = local.pool_id
-
-    # pool_unit_path = "../proxmox-pool"
   }
 }
 
@@ -51,8 +49,6 @@ unit "proxmox_lxc_2" {
     hostname = "${local.hostname}-2"
     password = local.password
     pool_id  = local.pool_id
-
-    # pool_unit_path = "../proxmox-pool"
   }
 }
 

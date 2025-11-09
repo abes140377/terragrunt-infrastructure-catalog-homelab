@@ -10,14 +10,6 @@ terraform {
   source = "git::git@github.com:abes140377/terragrunt-infrastructure-catalog-homelab.git//modules/proxmox-vm?ref=${values.version}"
 }
 
-# dependency "proxmox_pool" {
-#   config_path = try(values.pool_unit_path, "../proxmox-pool")
-
-#   mock_outputs = {
-#     pool_id = "mock-pool"
-#   }
-# }
-
 inputs = {
   # Required inputs
   vm_name = values.vm_name
