@@ -32,7 +32,7 @@ terraform {
 }
 
 dependency "compute" {
-  config_path = try(values.vm_unit_path, try(values.lxc_unit_path, ""))
+  config_path = values.compute_path
 
   # Mock outputs support single-VM pattern (both VM and LXC)
   mock_outputs = {

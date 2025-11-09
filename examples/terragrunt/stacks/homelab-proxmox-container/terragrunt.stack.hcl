@@ -37,20 +37,20 @@ unit "proxmox_lxc" {
   }
 }
 
-# unit "dns" {
-#   // Using local units with relative paths for testing
-#   // In production, use: git::git@github.com:abes140377/terragrunt-infrastructure-catalog-homelab.git//units/dns?ref=v1.0.0
-#   source = "./units/dns"
-#   path   = "dns"
+unit "dns" {
+  source = "../../../../units/dns"
+  path   = "dns"
 
-#   values = {
-#     name           = local.hostname
-#     zone           = local.zone
-#     dns_server     = local.dns_server
-#     dns_port       = local.dns_port
-#     key_name       = local.key_name
-#     key_algorithm  = local.key_algorithm
+  values = {
+    version = "feat/next"
 
-#     lxc_unit_path  = "../proxmox-lxc"
-#   }
-# }
+    name          = local.hostname
+    zone          = local.zone
+    dns_server    = local.dns_server
+    dns_port      = local.dns_port
+    key_name      = local.key_name
+    key_algorithm = local.key_algorithm
+
+    compute_path = "../proxmox-lxc"
+  }
+}

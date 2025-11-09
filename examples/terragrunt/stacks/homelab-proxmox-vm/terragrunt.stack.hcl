@@ -14,7 +14,6 @@ locals {
   key_algorithm = "hmac-sha512"
 }
 
-# Create a resource pool for organizing VMs
 unit "proxmox_pool" {
   source = "../../../../units/proxmox-pool"
   path   = "proxmox-pool"
@@ -45,21 +44,20 @@ unit "proxmox_vm" {
   }
 }
 
-# # Register VM IP in DNS
-# unit "dns" {
-#   // Using local units with relative paths for testing
-#   // In production, use: git::git@github.com:abes140377/terragrunt-infrastructure-catalog-homelab.git//units/dns?ref=v1.0.0
-#   source = "./units/dns"
-#   path   = "dns"
+unit "dns" {
+  source = "../../../../units/dns"
+  path   = "dns"
 
-#   values = {
-#     name = local.vm_name
-#     zone          = local.zone
-#     dns_server    = local.dns_server
-#     dns_port      = local.dns_port
-#     key_name      = local.key_name
-#     key_algorithm = local.key_algorithm
+  values = {
+    version = "feat/next"
 
-#     vm_unit_path = "../proxmox-vm"
-#   }
-# }
+    name          = local.vm_name
+    zone          = local.zone
+    dns_server    = local.dns_server
+    dns_port      = local.dns_port
+    key_name      = local.key_name
+    key_algorithm = local.key_algorithm
+
+    compute_path = "../proxmox-vm"
+  }
+}
