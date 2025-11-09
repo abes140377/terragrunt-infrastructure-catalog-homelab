@@ -22,7 +22,7 @@ fi
 
 cd "$STACKS_DIR/$selected_stack"
 
-CMD="terragrunt stack run apply"
+CMD="terragrunt stack run plan"
 
 if [ "$usage_auto_approve" = "true" ]; then
   CMD="$CMD --non-interactive"

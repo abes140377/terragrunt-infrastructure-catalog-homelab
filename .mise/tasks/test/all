@@ -7,11 +7,11 @@ mise run terragrunt:cleanup
 # === TOFU ===
 
 TOFUS=(
-  # naming
-  # proxmox-pool
-  # proxmox-vm
-  # proxmox-lxc
-  # dns
+  naming
+  proxmox-pool
+  proxmox-vm
+  proxmox-lxc
+  dns
 )
 
 for TOFU in "${TOFUS[@]}"; do
@@ -32,11 +32,11 @@ done
 # === TERRAGRUNT UNITS ===
 
 UNITS=(
-  # naming
-  # proxmox-pool
-  # proxmox-vm
-  # proxmox-lxc
-  # dns
+  naming
+  proxmox-pool
+  proxmox-vm
+  proxmox-lxc
+  dns
 )
 
 for UNIT in "${UNITS[@]}"; do
@@ -56,18 +56,13 @@ done
 
 STACKS=(
   homelab-proxmox-container
-  # homelab-proxmox-vm
+  homelab-proxmox-vm
 )
 
 for STACK in "${STACKS[@]}"; do
   mise --raw run terragrunt:stack:plan $STACK -a
   sleep 1
-  # mise --raw run terragrunt:stack:apply $STACK -a
-  # sleep 1
-done
-
-for (( idx=${#STACKS[@]}-1 ; idx>=0 ; idx-- )); do
-  STACK="${STACKS[idx]}"
-  mise --raw run terragrunt:stack:destroy $STACK -a
+  mise --raw run terragrunt:stack:apply $STACK -a
   sleep 1
+  mise --raw run terragrunt:stack:destroy $STACK -a
 done
