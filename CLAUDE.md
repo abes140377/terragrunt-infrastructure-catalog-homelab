@@ -80,11 +80,12 @@ The `examples/` directory contains working examples for local testing:
   - `proxmox-pool`: Resource pool creation example
   - `dns`: DNS record management example
   - `naming`: Naming convention example
-- `examples/terragrunt/stacks/`: Complete stack examples with local unit wrappers
+- `examples/terragrunt/stacks/`: Complete stack examples using relative paths to units
   - `homelab-proxmox-pool`: Proxmox resource pool only
   - `homelab-proxmox-container`: LXC container + pool + DNS
   - `homelab-proxmox-vm`: Virtual machine + pool + DNS
-- Examples use relative paths (e.g., `../../../.././/modules/proxmox-lxc`) instead of Git URLs
+- Unit examples use relative paths to modules (e.g., `../../../.././/modules/proxmox-lxc`)
+- Stack examples use relative paths to units (e.g., `../../../../units/proxmox-pool`)
 
 **Direct OpenTofu Examples** (`examples/tofu/`):
 - Direct module usage without Terragrunt wrappers
@@ -321,7 +322,6 @@ Examples:
    - Concrete values in `locals` block
 
 Examples:
-- `stacks/homelab-proxmox-pool/`: Resource pool only (not currently in main stacks, only in examples)
 - `stacks/homelab-proxmox-container/`: LXC container stack with pool and DNS
 - `stacks/homelab-proxmox-vm/`: Virtual machine stack with pool and DNS
 
