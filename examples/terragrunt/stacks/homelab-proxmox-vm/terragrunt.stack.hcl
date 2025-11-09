@@ -1,24 +1,24 @@
 locals {
   version = "feat/next"
 
+  # pool configuration
   pool_id = "example-stack-vm-pool"
 
+  # VM configuration
   vm_name = "example-stack-vm"
 
   # Optional: Customize VM resources
   # memory = 4096  # Memory in MB (default: 2048)
   # cores  = 4     # CPU cores (default: 2)
 
-  zone          = "home.sflab.io."
-  dns_server    = "192.168.1.13"
-  dns_port      = 5353
-  key_name      = "ddnskey."
-  key_algorithm = "hmac-sha512"
+  # DNS configuration
+  zone = "home.sflab.io."
 }
 
 unit "proxmox_pool" {
   source = "../../../../units/proxmox-pool"
-  path   = "proxmox-pool"
+
+  path = "proxmox-pool"
 
   values = {
     version = local.version
@@ -29,7 +29,8 @@ unit "proxmox_pool" {
 
 unit "proxmox_vm_1" {
   source = "../../../../units/proxmox-vm"
-  path   = "proxmox-vm-1"
+
+  path = "proxmox-vm-1"
 
   values = {
     version = local.version
@@ -47,7 +48,8 @@ unit "proxmox_vm_1" {
 
 unit "proxmox_vm_2" {
   source = "../../../../units/proxmox-vm"
-  path   = "proxmox-vm-2"
+
+  path = "proxmox-vm-2"
 
   values = {
     version = local.version
@@ -65,7 +67,8 @@ unit "proxmox_vm_2" {
 
 unit "dns_1" {
   source = "../../../../units/dns"
-  path   = "dns-1"
+
+  path = "dns-1"
 
   values = {
     version = local.version
@@ -79,7 +82,8 @@ unit "dns_1" {
 
 unit "dns_2" {
   source = "../../../../units/dns"
-  path   = "dns-2"
+
+  path = "dns-2"
 
   values = {
     version = local.version
