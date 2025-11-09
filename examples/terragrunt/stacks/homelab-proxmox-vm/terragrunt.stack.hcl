@@ -15,18 +15,6 @@ locals {
   zone = "home.sflab.io."
 }
 
-# unit "proxmox_pool" {
-#   source = "../../../../units/proxmox-pool"
-
-#   path = "proxmox-pool"
-
-#   values = {
-#     version = local.version
-
-#     pool_id = local.pool_id
-#   }
-# }
-
 unit "proxmox_vm_1" {
   source = "../../../../units/proxmox-vm"
 
