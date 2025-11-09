@@ -12,45 +12,46 @@ locals {
 }
 
 unit "proxmox_pool" {
-  // Using local units with relative paths for testing
-  // In production, use: git::git@github.com:abes140377/terragrunt-infrastructure-catalog-homelab.git//units/proxmox-pool?ref=v1.0.0
-  source = "./units/proxmox-pool"
+  # source = "./units/proxmox-pool"
+  source = "../../../../units/proxmox-pool"
   path   = "proxmox-pool"
 
   values = {
+    version = "feat/next"
+
     pool_id = local.pool_id
   }
 }
 
-unit "proxmox_lxc" {
-  // Using local units with relative paths for testing
-  // In production, use: git::git@github.com:abes140377/terragrunt-infrastructure-catalog-homelab.git//units/proxmox-lxc?ref=v1.0.0
-  source = "./units/proxmox-lxc"
-  path   = "proxmox-lxc"
+# unit "proxmox_lxc" {
+#   // Using local units with relative paths for testing
+#   // In production, use: git::git@github.com:abes140377/terragrunt-infrastructure-catalog-homelab.git//units/proxmox-lxc?ref=v1.0.0
+#   source = "./units/proxmox-lxc"
+#   path   = "proxmox-lxc"
 
-  values = {
-    hostname        = local.hostname
-    password        = local.password
-    pool_id         = local.pool_id
+#   values = {
+#     hostname        = local.hostname
+#     password        = local.password
+#     pool_id         = local.pool_id
 
-    pool_unit_path  = "../proxmox-pool"
-  }
-}
+#     pool_unit_path  = "../proxmox-pool"
+#   }
+# }
 
-unit "dns" {
-  // Using local units with relative paths for testing
-  // In production, use: git::git@github.com:abes140377/terragrunt-infrastructure-catalog-homelab.git//units/dns?ref=v1.0.0
-  source = "./units/dns"
-  path   = "dns"
+# unit "dns" {
+#   // Using local units with relative paths for testing
+#   // In production, use: git::git@github.com:abes140377/terragrunt-infrastructure-catalog-homelab.git//units/dns?ref=v1.0.0
+#   source = "./units/dns"
+#   path   = "dns"
 
-  values = {
-    name           = local.hostname
-    zone           = local.zone
-    dns_server     = local.dns_server
-    dns_port       = local.dns_port
-    key_name       = local.key_name
-    key_algorithm  = local.key_algorithm
+#   values = {
+#     name           = local.hostname
+#     zone           = local.zone
+#     dns_server     = local.dns_server
+#     dns_port       = local.dns_port
+#     key_name       = local.key_name
+#     key_algorithm  = local.key_algorithm
 
-    lxc_unit_path  = "../proxmox-lxc"
-  }
-}
+#     lxc_unit_path  = "../proxmox-lxc"
+#   }
+# }

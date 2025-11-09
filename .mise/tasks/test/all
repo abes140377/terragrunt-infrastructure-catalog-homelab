@@ -11,7 +11,7 @@ TOFUS=(
   # proxmox-pool
   # proxmox-vm
   # proxmox-lxc
-  dns
+  # dns
 )
 
 for TOFU in "${TOFUS[@]}"; do
@@ -29,44 +29,45 @@ for (( idx=${#TOFUS[@]}-1 ; idx>=0 ; idx-- )); do
   sleep 1
 done
 
-# # === TERRAGRUNT UNITS ===
+# === TERRAGRUNT UNITS ===
 
-# UNITS=(
-#   naming
-#   proxmox-pool
-#   proxmox-vm
-#   proxmox-lxc
-# )
+UNITS=(
+  # naming
+  # proxmox-pool
+  # proxmox-vm
+  # proxmox-lxc
+  # dns
+)
 
-# for UNIT in "${UNITS[@]}"; do
-#   mise --raw run terragrunt:unit:plan $UNIT
-#   sleep 1
-#   mise --raw run terragrunt:unit:apply $UNIT
-#   sleep 1
-# done
+for UNIT in "${UNITS[@]}"; do
+  mise --raw run terragrunt:unit:plan $UNIT
+  sleep 1
+  mise --raw run terragrunt:unit:apply $UNIT
+  sleep 1
+done
 
-# for (( idx=${#UNITS[@]}-1 ; idx>=0 ; idx-- )); do
-#   UNIT="${UNITS[idx]}"
-#   mise --raw run terragrunt:unit:destroy $UNIT -a
-#   sleep 1
-# done
+for (( idx=${#UNITS[@]}-1 ; idx>=0 ; idx-- )); do
+  UNIT="${UNITS[idx]}"
+  mise --raw run terragrunt:unit:destroy $UNIT -a
+  sleep 1
+done
 
-# # === TERRAGRUNT STACKS ===
+# === TERRAGRUNT STACKS ===
 
-# STACKS=(
-#   homelab-proxmox-container
-#   homelab-proxmox-vm
-# )
+STACKS=(
+  homelab-proxmox-container
+  # homelab-proxmox-vm
+)
 
-# for STACK in "${STACKS[@]}"; do
-#   mise --raw run terragrunt:stack:plan $STACK -a
-#   sleep 1
-#   mise --raw run terragrunt:stack:apply $STACK -a
-#   sleep 1
-# done
+for STACK in "${STACKS[@]}"; do
+  mise --raw run terragrunt:stack:plan $STACK -a
+  sleep 1
+  # mise --raw run terragrunt:stack:apply $STACK -a
+  # sleep 1
+done
 
-# for (( idx=${#STACKS[@]}-1 ; idx>=0 ; idx-- )); do
-#   STACK="${STACKS[idx]}"
-#   mise --raw run terragrunt:stack:destroy $STACK -a
-#   sleep 1
-# done
+for (( idx=${#STACKS[@]}-1 ; idx>=0 ; idx-- )); do
+  STACK="${STACKS[idx]}"
+  mise --raw run terragrunt:stack:destroy $STACK -a
+  sleep 1
+done
