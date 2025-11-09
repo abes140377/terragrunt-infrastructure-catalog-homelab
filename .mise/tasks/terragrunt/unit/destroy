@@ -4,28 +4,33 @@ set -e
 
 #USAGE arg "<target>" help="The target unit" default=""
 #USAGE flag "-d --dry-run" help="Show the commands without executing it"
+#USAGE flag "-a --auto-approve" help="Automatically approve the destroy action"
 
 UNITS_DIR="$MISE_CONFIG_ROOT/examples/terragrunt/units"
 
 if [[ -z "${usage_target:-}" ]]; then
-  # list all directories in examples/terragrunt/units and create a array of the names
   unit_dirs=()
 
   while IFS= read -r -d '' dir; do
     unit_dirs+=("$(basename "$dir")")
   done < <(find "$UNITS_DIR" -mindepth 1 -maxdepth 1 -type d -print0)
 
-  # Show a selection menu with gum to select a unit
   selected_unit=$(printf "%s\n" "${unit_dirs[@]}" | gum choose --header="Select a unit to operate on:")
+else
+  selected_unit+=("${usage_target}")
 fi
 
 cd "$UNITS_DIR/$selected_unit"
 
-TERRAGRUNT_DESTROY_CMD="terragrunt destroy"
+CMD="terragrunt destroy"
+
+if [ "$usage_auto_approve" = "true" ]; then
+  CMD="$CMD -- -auto-approve"
+fi
 
 echo ""
 echo "🚀 Executing..."
-echo "   Commands: $TERRAGRUNT_DESTROY_CMD"
+echo "   Command: $CMD"
 echo "   Working dir: $(pwd)"
 echo ""
 
@@ -34,4 +39,4 @@ if [ "$usage_dry_run" = "true" ]; then
   exit 0
 fi
 
-eval $TERRAGRUNT_DESTROY_CMD
+eval $CMD

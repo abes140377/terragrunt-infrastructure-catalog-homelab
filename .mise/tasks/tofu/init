@@ -4,23 +4,25 @@ set -e
 #USAGE arg "<target>" help="The target unit" default=""
 #USAGE flag "-d --dry-run" help="Show the commands without executing it"
 
-UNITS_DIR="$MISE_CONFIG_ROOT/examples/terragrunt/units"
+TOFU_DIR="$MISE_CONFIG_ROOT/examples/tofu"
 
 if [[ -z "${usage_target:-}" ]]; then
   unit_dirs=()
 
   while IFS= read -r -d '' dir; do
     unit_dirs+=("$(basename "$dir")")
-  done < <(find "$UNITS_DIR" -mindepth 1 -maxdepth 1 -type d -print0)
+  done < <(find "$TOFU_DIR" -mindepth 1 -maxdepth 1 -type d -print0)
 
   selected_unit=$(printf "%s\n" "${unit_dirs[@]}" | gum choose --header="Select a unit to operate on:")
 else
   selected_unit+=("${usage_target}")
 fi
 
-cd "$UNITS_DIR/$selected_unit"
+cd "$TOFU_DIR/$selected_unit"
 
-CMD="terragrunt apply --auto-approve"
+pwd
+
+CMD="tofu init"
 
 echo ""
 echo "🚀 Executing..."

@@ -10,11 +10,9 @@ PROJECT_NAME = "{{ config_root | basename }}"
 _.file = [
   { path = "{{env.HOME}}/.env", optional = true },
   { path = ".env", optional = true },
-  { path = ".creds.env.yaml", redact = true }
+  { path = ".creds.env.yaml", redact = true },
 ]
-_.path = [
-  "./scripts"
-]
+_.path = ["./scripts"]
 
 [hooks]
 enter = [
@@ -23,5 +21,5 @@ enter = [
   #
   'mise i -q',
   #
-  'pre-commit install -f --hook-type pre-commit'
+  'pre-commit install -f --hook-type pre-commit',
 ]

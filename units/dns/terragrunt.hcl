@@ -13,7 +13,7 @@ provider "dns" {
     port          = ${try(values.dns_port, 53)}
     key_name      = "${values.key_name}"
     key_algorithm = "${values.key_algorithm}"
-    key_secret    = var.dns_key_secret
+    # key_secret    = var.dns_key_secret
     key_secret    = "${get_env("TF_VAR_dns_key_secret", "mock-secret-for-testing")}"
   }
 }

@@ -4,6 +4,7 @@ set -e
 
 #USAGE arg "<target>" help="The target unit" default=""
 #USAGE flag "-d --dry-run" help="Show the commands without executing it"
+#USAGE flag "-a --auto-approve" help="Automatically approve the destroy action"
 
 STACKS_DIR="$MISE_CONFIG_ROOT/examples/terragrunt/stacks"
 
@@ -21,11 +22,15 @@ fi
 
 cd "$STACKS_DIR/$selected_stack"
 
-STACK_RUN_APPLY_CMD="terragrunt stack run apply"
+CMD="terragrunt stack run apply"
+
+if [ "$usage_auto_approve" = "true" ]; then
+  CMD="$CMD --non-interactive"
+fi
 
 echo ""
 echo "🚀 Executing..."
-echo "   Commands: $STACK_RUN_APPLY_CMD"
+echo "   Commands: $CMD"
 echo "   Working dir: $(pwd)"
 echo ""
 
@@ -34,4 +39,4 @@ if [ "$usage_dry_run" = "true" ]; then
   exit 0
 fi
 
-eval $STACK_RUN_APPLY_CMD
+eval $CMD

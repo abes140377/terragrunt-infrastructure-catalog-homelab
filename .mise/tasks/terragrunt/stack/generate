@@ -21,11 +21,11 @@ fi
 
 cd "$STACKS_DIR/$selected_stack"
 
-STACK_GENERATE_CMD="terragrunt stack generate"
+CMD="terragrunt stack generate"
 
 echo ""
 echo "🚀 Executing..."
-echo "   Commands: $STACK_GENERATE_CMD"
+echo "   Commands: $CMD"
 echo "   Working dir: $(pwd)"
 echo ""
 
@@ -34,4 +34,4 @@ if [ "$usage_dry_run" = "true" ]; then
   exit 0
 fi
 
-eval $STACK_GENERATE_CMD
+eval $CMD

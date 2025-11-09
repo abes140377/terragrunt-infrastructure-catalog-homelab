@@ -20,7 +20,7 @@ fi
 
 cd "$UNITS_DIR/$selected_unit"
 
-CMD="terragrunt apply --auto-approve"
+CMD="terragrunt plan"
 
 echo ""
 echo "🚀 Executing..."
