@@ -8,7 +8,6 @@ locals {
   zone = try(values.dns_zone, "home.sflab.io.")
 }
 
-# Create a resource pool for organizing VMs
 unit "proxmox_pool" {
   source = "git::git@github.com:abes140377/terragrunt-infrastructure-catalog-homelab.git//units/proxmox-pool?ref=${values.version}"
 
@@ -21,7 +20,6 @@ unit "proxmox_pool" {
   }
 }
 
-# Create a single VM
 unit "proxmox_vm" {
   source = "git::git@github.com:abes140377/terragrunt-infrastructure-catalog-homelab.git//units/proxmox-vm?ref=${values.version}"
 
@@ -39,7 +37,6 @@ unit "proxmox_vm" {
   }
 }
 
-# Register VM IP in DNS
 unit "dns" {
   source = "git::git@github.com:abes140377/terragrunt-infrastructure-catalog-homelab.git//units/dns?ref=${values.version}"
 
