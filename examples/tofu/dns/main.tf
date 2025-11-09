@@ -11,9 +11,9 @@ terraform {
 provider "dns" {
   update {
     server        = "192.168.1.13"
-    port          = 53
+    port          = 5353
     key_name      = "ddnskey."
-    key_algorithm = "hmac-sha256"
+    key_algorithm = "hmac-sha512"
     key_secret    = var.dns_key_secret
   }
 }
@@ -31,7 +31,7 @@ module "dns" {
   addresses = ["192.168.1.88"]
 }
 
-# output "name" {
-#   description = "Generated name"
-#   value       = module.proxmox_pool.pool_id
-# }
+output "fqdn" {
+  description = "Generated FQDN"
+  value       = module.dns.fqdn
+}

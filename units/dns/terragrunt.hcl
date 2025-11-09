@@ -10,7 +10,7 @@ generate "provider" {
 provider "dns" {
   update {
     server        = "${values.dns_server}"
-    port          = ${try(values.dns_port, 53)}
+    port          = ${try(values.dns_port, 5353)}
     key_name      = "${values.key_name}"
     key_algorithm = "${values.key_algorithm}"
     # key_secret    = var.dns_key_secret
