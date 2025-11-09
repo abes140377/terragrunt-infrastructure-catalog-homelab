@@ -4,14 +4,10 @@ SCRIPT_DIR=$( cd -- "$( dirname -- "${BASH_SOURCE[0]}" )" &> /dev/null && pwd )
 
 cd "$SCRIPT_DIR/../../.."
 
-# Find all directories .terragrunt-cahe and delete
 find . -type d -name ".terragrunt-stack" -exec rm -rf {} +
 
-# Find all directories .terragrunt-cahe and delete
 find . -type d -name ".terragrunt-cache" -exec rm -rf {} +
 
-# Find all directories .terragrunt-cahe and delete
 find . -type d -name ".terraform" -exec rm -rf {} +
 
-# Find all files .terraform.lock.hcl and delete
 find . -type f -name ".terraform.lock.hcl" -exec rm -f {} +
