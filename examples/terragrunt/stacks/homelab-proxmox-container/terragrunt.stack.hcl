@@ -46,10 +46,6 @@ unit "dns" {
 
     name          = local.hostname
     zone          = local.zone
-    dns_server    = local.dns_server
-    dns_port      = local.dns_port
-    key_name      = local.key_name
-    key_algorithm = local.key_algorithm
 
     compute_path = "../proxmox-lxc"
   }

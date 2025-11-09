@@ -2,6 +2,11 @@ include "root" {
   path = find_in_parent_folders("root.hcl")
 }
 
+include "dns-config" {
+  path = find_in_parent_folders("dns-config.hcl")
+  expose = true
+}
+
 # Generate DNS provider block
 generate "provider" {
   path      = "provider.tf"
@@ -9,11 +14,10 @@ generate "provider" {
   contents  = <<EOF
 provider "dns" {
   update {
-    server        = "${values.dns_server}"
-    port          = ${try(values.dns_port, 5353)}
-    key_name      = "${values.key_name}"
-    key_algorithm = "${values.key_algorithm}"
-    # key_secret    = var.dns_key_secret
+    server        = "${include.dns-config.locals.dns_server}"
+    port          = "${include.dns-config.locals.dns_port}"
+    key_name      = "${include.dns-config.locals.key_name}"
+    key_algorithm = "${include.dns-config.locals.key_algorithm}"
     key_secret    = "${get_env("TF_VAR_dns_key_secret", "mock-secret-for-testing")}"
   }
 }

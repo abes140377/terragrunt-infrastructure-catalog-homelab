@@ -2,9 +2,10 @@
 
 set -e
 
-mise run terragrunt:cleanup
-
-# === TOFU ===
+#USAGE flag "-t --tofu" help="Run tofu tests"
+#USAGE flag "-u --units" help="Run terragrunt unit tests"
+#USAGE flag "-s --stacks" help="Run terragrunt stack tests"
+#USAGE flag "-a --all" help="Run all tests"
 
 TOFUS=(
   naming
@@ -14,23 +15,6 @@ TOFUS=(
   dns
 )
 
-for TOFU in "${TOFUS[@]}"; do
-  mise run tofu:init $TOFU
-  sleep 1
-  mise run tofu:plan $TOFU
-  sleep 1
-  mise run tofu:apply $TOFU
-  sleep 1
-done
-
-for (( idx=${#TOFUS[@]}-1 ; idx>=0 ; idx-- )); do
-  TOFU="${TOFUS[idx]}"
-  mise run tofu:destroy $TOFU -a
-  sleep 1
-done
-
-# === TERRAGRUNT UNITS ===
-
 UNITS=(
   naming
   proxmox-pool
@@ -39,30 +23,78 @@ UNITS=(
   dns
 )
 
-for UNIT in "${UNITS[@]}"; do
-  mise --raw run terragrunt:unit:plan $UNIT
-  sleep 1
-  mise --raw run terragrunt:unit:apply $UNIT
-  sleep 1
-done
-
-for (( idx=${#UNITS[@]}-1 ; idx>=0 ; idx-- )); do
-  UNIT="${UNITS[idx]}"
-  mise --raw run terragrunt:unit:destroy $UNIT -a
-  sleep 1
-done
-
-# === TERRAGRUNT STACKS ===
-
 STACKS=(
-  homelab-proxmox-container
+  # homelab-proxmox-container
   homelab-proxmox-vm
 )
 
-for STACK in "${STACKS[@]}"; do
-  mise --raw run terragrunt:stack:plan $STACK -a
-  sleep 1
-  mise --raw run terragrunt:stack:apply $STACK -a
-  sleep 1
-  mise --raw run terragrunt:stack:destroy $STACK -a
-done
+mise run terragrunt:cleanup
+
+# === TOFU ===
+function run_tofu_tests() {
+  for TOFU in "${TOFUS[@]}"; do
+    mise run tofu:init $TOFU
+    sleep 1
+    mise run tofu:plan $TOFU
+    sleep 1
+    mise run tofu:apply $TOFU
+    sleep 1
+  done
+
+  for (( idx=${#TOFUS[@]}-1 ; idx>=0 ; idx-- )); do
+    TOFU="${TOFUS[idx]}"
+    mise run tofu:destroy $TOFU -a
+    sleep 1
+  done
+}
+
+# === TERRAGRUNT UNITS ===
+function run_terragrunt_unit_tests() {
+  for UNIT in "${UNITS[@]}"; do
+    mise --raw run terragrunt:unit:plan $UNIT
+    sleep 1
+    mise --raw run terragrunt:unit:apply $UNIT
+    sleep 1
+  done
+
+  # Destroy in reverse order
+  for (( idx=${#UNITS[@]}-1 ; idx>=0 ; idx-- )); do
+    UNIT="${UNITS[idx]}"
+    mise --raw run terragrunt:unit:destroy $UNIT -a
+    sleep 1
+  done
+}
+
+# === TERRAGRUNT STACKS ===
+function run_terragrunt_stack_tests() {
+  for STACK in "${STACKS[@]}"; do
+    mise --raw run terragrunt:stack:plan $STACK
+    sleep 1
+    mise --raw run terragrunt:stack:apply $STACK
+    sleep 1
+  done
+
+  # Destroy in reverse order
+  for (( idx=${#STACKS[@]}-1 ; idx>=0 ; idx-- )); do
+    STACK="${STACKS[idx]}"
+    mise --raw run terragrunt:stack:destroy $STACK -a
+    sleep 1
+  done
+}
+
+# === main ===
+
+if [ "$usage_all" = "true" ] || [ "$usage_tofu" = "true" ]; then
+  echo "=== Running TOFU tests ==="
+  run_tofu_tests
+fi
+if [ "$usage_all" = "true" ] || [ "$usage_units" = "true" ]; then
+  echo "=== Running Terragrunt Unit tests ==="
+  run_terragrunt_unit_tests
+fi
+if [ "$usage_all" = "true" ] || [ "$usage_stacks" = "true" ]; then
+  echo "=== Running Terragrunt Stack tests ==="
+  run_terragrunt_stack_tests
+fi
+
+echo "✅ All tests completed successfully."
