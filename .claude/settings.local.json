@@ -12,7 +12,8 @@
       "Bash(pre-commit run:*)",
       "mcp__Ref__ref_search_documentation",
       "mcp__Ref__ref_read_url",
-      "Bash(mise task info:*)"
+      "Bash(mise task info:*)",
+      "Bash(mc --version:*)"
     ],
     "deny": [],
     "ask": []

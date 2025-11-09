@@ -81,6 +81,7 @@ The `examples/` directory contains working examples for local testing:
   - `dns`: DNS record management example
   - `naming`: Naming convention example
 - `examples/terragrunt/stacks/`: Complete stack examples with local unit wrappers
+  - `homelab-proxmox-pool`: Proxmox resource pool only
   - `homelab-proxmox-container`: LXC container + pool + DNS
   - `homelab-proxmox-vm`: Virtual machine + pool + DNS
 - Examples use relative paths (e.g., `../../../.././/modules/proxmox-lxc`) instead of Git URLs
@@ -320,6 +321,7 @@ Examples:
    - Concrete values in `locals` block
 
 Examples:
+- `stacks/homelab-proxmox-pool/`: Resource pool only (not currently in main stacks, only in examples)
 - `stacks/homelab-proxmox-container/`: LXC container stack with pool and DNS
 - `stacks/homelab-proxmox-vm/`: Virtual machine stack with pool and DNS
 
