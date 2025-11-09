@@ -46,6 +46,6 @@ unit "dns" {
     zone = local.zone
     name = local.vm_name
 
-    vm_unit_path = "../proxmox-vm"
+    compute_path = "../proxmox-vm"
   }
 }

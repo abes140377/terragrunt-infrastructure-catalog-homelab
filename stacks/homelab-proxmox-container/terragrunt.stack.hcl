@@ -46,6 +46,6 @@ unit "dns" {
     name = local.hostname
     zone = local.zone
 
-    lxc_unit_path = "../proxmox-lxc"
+    compute_path = "../proxmox-lxc"
   }
 }

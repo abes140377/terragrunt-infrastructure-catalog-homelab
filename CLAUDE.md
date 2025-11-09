@@ -54,6 +54,7 @@ Run `mise install` to install all required tools.
    - `proxmox-vm`: Creates virtual machines on Proxmox via template cloning
    - `proxmox-pool`: Creates Proxmox resource pools
    - `dns`: Manages DNS A records on BIND9 servers
+   - `naming`: Wrapper around the homelab provider for standardized resource naming
    - These are basic building blocks with no Terragrunt-specific logic
 
 2. **Units** (`units/`): Terragrunt wrappers around modules
@@ -70,17 +71,25 @@ Run `mise install` to install all required tools.
    - Example: `stacks/homelab-proxmox-container/` combines proxmox-pool, proxmox-lxc, and dns units
 
 **Examples Directory:**
-The `examples/terragrunt/` directory contains working examples for local testing:
+The `examples/` directory contains working examples for local testing:
 
+**Terragrunt Examples** (`examples/terragrunt/`):
 - `examples/terragrunt/units/`: Individual unit examples with relative module paths
   - `proxmox-lxc`: LXC container deployment example
   - `proxmox-vm`: Virtual machine deployment example
   - `proxmox-pool`: Resource pool creation example
   - `dns`: DNS record management example
+  - `naming`: Naming convention example
 - `examples/terragrunt/stacks/`: Complete stack examples with local unit wrappers
   - `homelab-proxmox-container`: LXC container + pool + DNS
   - `homelab-proxmox-vm`: Virtual machine + pool + DNS
 - Examples use relative paths (e.g., `../../../.././/modules/proxmox-lxc`) instead of Git URLs
+
+**Direct OpenTofu Examples** (`examples/tofu/`):
+- Direct module usage without Terragrunt wrappers
+- Available examples: `proxmox-lxc`, `proxmox-vm`, `proxmox-pool`, `dns`, `naming`
+- Useful for testing modules independently
+- Use relative paths to reference modules (e.g., `../../../modules/proxmox-lxc`)
 
 **Git URL Pattern:**
 Units and stacks use Git URLs in their `source` field because they are designed to be consumed as shallow directories by external users who won't have access to the full repository. The examples use relative paths (`../../../.././/modules/proxmox-lxc`) for local development.
@@ -153,14 +162,32 @@ mise run terragrunt:cleanup
 # Quick apply for units (interactive selection menu)
 mise run terragrunt:unit:apply
 
+# Quick plan for units (interactive selection menu)
+mise run terragrunt:unit:plan
+
 # Quick destroy for units (interactive selection menu)
 mise run terragrunt:unit:destroy
 
 # Quick apply for stacks (interactive selection menu)
 mise run terragrunt:stack:apply
 
+# Quick plan for stacks (interactive selection menu)
+mise run terragrunt:stack:plan
+
 # Quick destroy for stacks (interactive selection menu)
 mise run terragrunt:stack:destroy
+
+# Generate stack locally
+mise run terragrunt:stack:generate
+
+# Run all tests
+mise run test:all
+
+# Direct OpenTofu commands for examples/tofu
+mise run tofu:init
+mise run tofu:plan
+mise run tofu:apply
+mise run tofu:destroy
 
 # Build custom homelab provider
 mise run tofu:provider:build
@@ -277,6 +304,7 @@ Examples:
 - `units/proxmox-vm/terragrunt.hcl`: Virtual machine unit
 - `units/proxmox-pool/terragrunt.hcl`: Resource pool unit
 - `units/dns/terragrunt.hcl`: DNS record unit
+- `units/naming/terragrunt.hcl`: Naming convention unit
 
 ### Adding New Stacks
 
@@ -575,6 +603,18 @@ Current modules support:
     - Algorithm: `hmac-sha512`
     - Authentication: Uses TSIG (Transaction Signature) for secure dynamic DNS updates
     - Secret: Passed via `TF_VAR_dns_key_secret` environment variable
+
+**Naming Resources:**
+
+- **Resource Naming** (`modules/naming`): Wrapper around the homelab provider for standardized naming conventions
+  - Data Source: `homelab_naming` (from custom homelab provider)
+  - Provider: `abes140377/homelab` (custom provider)
+  - Required inputs:
+    - `env` (string): Environment name (e.g., "dev", "staging", "prod")
+    - `app` (string): Application name (e.g., "web", "db", "api")
+  - Outputs: `vm_name` (generated name following pattern `<env>-<app>`)
+  - Usage: Provides consistent naming across all infrastructure resources
+  - See "Custom Homelab Provider" section for more details
 
 ### Custom Homelab Provider
 
