@@ -16,7 +16,6 @@ remote_state {
 
   config = {
     bucket                      = "${local.s3_backend_prefix}-tfstates"
-
     key                         = "${path_relative_to_include()}/tofu.tfstate"
     region                      = local.s3_backend_region
     endpoint                    = local.s3_backend_endpoint
