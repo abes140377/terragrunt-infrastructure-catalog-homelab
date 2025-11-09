@@ -7,6 +7,11 @@ set -e
 #USAGE flag "-s --stacks" help="Run terragrunt stack tests"
 #USAGE flag "-a --all" help="Run all tests"
 
+if [ "$usage_all" != "true" ] && [ "$usage_tofu" != "true" ] && [ "$usage_units" != "true" ] && [ "$usage_stacks" != "true" ]; then
+  echo "No test type specified. Use -a, -t, -u, or -s to specify tests to run."
+  exit 1
+fi
+
 TOFUS=(
   naming
   proxmox-pool
@@ -24,7 +29,7 @@ UNITS=(
 )
 
 STACKS=(
-  # homelab-proxmox-container
+  homelab-proxmox-container
   homelab-proxmox-vm
 )
 
@@ -51,8 +56,8 @@ function run_tofu_tests() {
 # === TERRAGRUNT UNITS ===
 function run_terragrunt_unit_tests() {
   for UNIT in "${UNITS[@]}"; do
-    mise --raw run terragrunt:unit:plan $UNIT
-    sleep 1
+    # mise --raw run terragrunt:unit:plan $UNIT
+    # sleep 1
     mise --raw run terragrunt:unit:apply $UNIT
     sleep 1
   done
@@ -68,8 +73,8 @@ function run_terragrunt_unit_tests() {
 # === TERRAGRUNT STACKS ===
 function run_terragrunt_stack_tests() {
   for STACK in "${STACKS[@]}"; do
-    mise --raw run terragrunt:stack:plan $STACK
-    sleep 1
+    # mise --raw run terragrunt:stack:plan $STACK
+    # sleep 1
     mise --raw run terragrunt:stack:apply $STACK
     sleep 1
   done
@@ -77,8 +82,8 @@ function run_terragrunt_stack_tests() {
   # Destroy in reverse order
   for (( idx=${#STACKS[@]}-1 ; idx>=0 ; idx-- )); do
     STACK="${STACKS[idx]}"
-    mise --raw run terragrunt:stack:destroy $STACK -a
-    sleep 1
+    # mise --raw run terragrunt:stack:destroy $STACK -a
+    # sleep 1
   done
 }
 

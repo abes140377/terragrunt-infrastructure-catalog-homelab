@@ -1,4 +1,6 @@
 locals {
+  version = "feat/next"
+
   pool_id = "example-stack-vm-pool"
 
   vm_name = "example-stack-vm"
@@ -19,22 +21,21 @@ unit "proxmox_pool" {
   path   = "proxmox-pool"
 
   values = {
-    version = "feat/next"
+    version = local.version
 
     pool_id = local.pool_id
   }
 }
 
-# Create a single VM
-unit "proxmox_vm" {
+unit "proxmox_vm_1" {
   source = "../../../../units/proxmox-vm"
-  path   = "proxmox-vm"
+  path   = "proxmox-vm-1"
 
   values = {
-    version = "feat/next"
+    version = local.version
 
-    vm_name        = local.vm_name
-    pool_id        = local.pool_id
+    vm_name = "${local.vm_name}-1"
+    pool_id = local.pool_id
 
     pool_unit_path = "../proxmox-pool"
 
@@ -44,16 +45,48 @@ unit "proxmox_vm" {
   }
 }
 
-unit "dns" {
-  source = "../../../../units/dns"
-  path   = "dns"
+unit "proxmox_vm_2" {
+  source = "../../../../units/proxmox-vm"
+  path   = "proxmox-vm-2"
 
   values = {
-    version = "feat/next"
+    version = local.version
 
-    name          = local.vm_name
-    zone          = local.zone
+    vm_name = "${local.vm_name}-2"
+    pool_id = local.pool_id
 
-    compute_path = "../proxmox-vm"
+    pool_unit_path = "../proxmox-pool"
+
+    # Optional: Customize VM resources
+    # memory = try(local.memory, 2048)
+    # cores  = try(local.cores, 2)
+  }
+}
+
+unit "dns_1" {
+  source = "../../../../units/dns"
+  path   = "dns-1"
+
+  values = {
+    version = local.version
+
+    name = local.vm_name
+    zone = local.zone
+
+    compute_path = "../proxmox-vm-1"
+  }
+}
+
+unit "dns_2" {
+  source = "../../../../units/dns"
+  path   = "dns-2"
+
+  values = {
+    version = local.version
+
+    name = local.vm_name
+    zone = local.zone
+
+    compute_path = "../proxmox-vm-2"
   }
 }
