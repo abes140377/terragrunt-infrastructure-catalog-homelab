@@ -6,13 +6,13 @@ terraform {
   source = "git::git@github.com:abes140377/terragrunt-infrastructure-catalog-homelab.git//modules/proxmox-lxc?ref=${values.version}"
 }
 
-dependency "proxmox_pool" {
-  config_path = try(values.pool_unit_path, "../proxmox-pool")
+# dependency "proxmox_pool" {
+#   config_path = try(values.pool_unit_path, "../proxmox-pool")
 
-  mock_outputs = {
-    pool_id = "mock-pool"
-  }
-}
+#   mock_outputs = {
+#     pool_id = "mock-pool"
+#   }
+# }
 
 inputs = {
   # Required inputs

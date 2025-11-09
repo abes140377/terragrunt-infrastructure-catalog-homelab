@@ -31,7 +31,7 @@ unit "proxmox_lxc" {
     password = local.password
     pool_id  = local.pool_id
 
-    pool_unit_path = "../proxmox-pool"
+    # pool_unit_path = "../proxmox-pool"
   }
 }
 

@@ -2,7 +2,7 @@ locals {
   version = "feat/next"
 
   # pool configuration
-  pool_id = "example-stack-container-pool"
+  pool_id = "example-stack-pool"
 
   # container configuration
   hostname = "example-stack-container"
@@ -12,17 +12,17 @@ locals {
   zone = "home.sflab.io."
 }
 
-unit "proxmox_pool" {
-  source = "../../../../units/proxmox-pool"
+# unit "proxmox_pool" {
+#   source = "../../../../units/proxmox-pool"
 
-  path = "proxmox-pool"
+#   path = "proxmox-pool"
 
-  values = {
-    version = local.version
+#   values = {
+#     version = local.version
 
-    pool_id = local.pool_id
-  }
-}
+#     pool_id = local.pool_id
+#   }
+# }
 
 unit "proxmox_lxc_1" {
   source = "../../../../units/proxmox-lxc"
@@ -36,7 +36,7 @@ unit "proxmox_lxc_1" {
     password = local.password
     pool_id  = local.pool_id
 
-    pool_unit_path = "../proxmox-pool"
+    # pool_unit_path = "../proxmox-pool"
   }
 }
 
@@ -52,7 +52,7 @@ unit "proxmox_lxc_2" {
     password = local.password
     pool_id  = local.pool_id
 
-    pool_unit_path = "../proxmox-pool"
+    # pool_unit_path = "../proxmox-pool"
   }
 }
 

@@ -33,7 +33,7 @@ unit "proxmox_vm" {
     cores   = local.cores
     pool_id = local.pool_id
 
-    pool_unit_path = "../proxmox-pool"
+    # pool_unit_path = "../proxmox-pool"
   }
 }
 

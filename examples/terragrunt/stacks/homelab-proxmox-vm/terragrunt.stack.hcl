@@ -2,7 +2,7 @@ locals {
   version = "feat/next"
 
   # pool configuration
-  pool_id = "example-stack-vm-pool"
+  pool_id = "example-stack-pool"
 
   # VM configuration
   vm_name = "example-stack-vm"
@@ -15,17 +15,17 @@ locals {
   zone = "home.sflab.io."
 }
 
-unit "proxmox_pool" {
-  source = "../../../../units/proxmox-pool"
+# unit "proxmox_pool" {
+#   source = "../../../../units/proxmox-pool"
 
-  path = "proxmox-pool"
+#   path = "proxmox-pool"
 
-  values = {
-    version = local.version
+#   values = {
+#     version = local.version
 
-    pool_id = local.pool_id
-  }
-}
+#     pool_id = local.pool_id
+#   }
+# }
 
 unit "proxmox_vm_1" {
   source = "../../../../units/proxmox-vm"
@@ -38,7 +38,7 @@ unit "proxmox_vm_1" {
     vm_name = "${local.vm_name}-1"
     pool_id = local.pool_id
 
-    pool_unit_path = "../proxmox-pool"
+    # pool_unit_path = "../proxmox-pool"
 
     # Optional: Customize VM resources
     # memory = try(local.memory, 2048)
@@ -57,7 +57,7 @@ unit "proxmox_vm_2" {
     vm_name = "${local.vm_name}-2"
     pool_id = local.pool_id
 
-    pool_unit_path = "../proxmox-pool"
+    # pool_unit_path = "../proxmox-pool"
 
     # Optional: Customize VM resources
     # memory = try(local.memory, 2048)

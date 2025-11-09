@@ -29,6 +29,7 @@ UNITS=(
 )
 
 STACKS=(
+  homelab-proxmox-pool
   homelab-proxmox-container
   homelab-proxmox-vm
 )
@@ -82,8 +83,8 @@ function run_terragrunt_stack_tests() {
   # Destroy in reverse order
   for (( idx=${#STACKS[@]}-1 ; idx>=0 ; idx-- )); do
     STACK="${STACKS[idx]}"
-    # mise --raw run terragrunt:stack:destroy $STACK -a
-    # sleep 1
+    mise --raw run terragrunt:stack:destroy $STACK -a
+    sleep 1
   done
 }
 
