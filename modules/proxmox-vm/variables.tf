@@ -1,5 +1,10 @@
-variable "vm_name" {
-  description = "The name of the virtual machine."
+variable "env" {
+  description = "The environment this VM belongs to (e.g., dev, staging, prod)."
+  type        = string
+}
+
+variable "app" {
+  description = "The application this VM belongs to (e.g., web, db, api)."
   type        = string
 }
 

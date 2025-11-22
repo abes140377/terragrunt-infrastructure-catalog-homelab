@@ -1,5 +1,10 @@
+data "homelab_naming" "this" {
+  env = var.env
+  app = var.app
+}
+
 resource "proxmox_virtual_environment_vm" "this" {
-  name      = var.vm_name
+  name      = data.homelab_naming.this.name
   node_name = "pve1"
 
   clone {

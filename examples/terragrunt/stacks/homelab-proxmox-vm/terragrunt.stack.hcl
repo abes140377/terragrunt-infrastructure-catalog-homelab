@@ -4,8 +4,9 @@ locals {
   # pool configuration
   pool_id = "example-stack-pool"
 
-  # VM configuration
-  vm_name = "example-stack-vm"
+  # VM naming configuration
+  env = "dev"
+  app = "stack-vm"
 
   # Optional: Customize VM resources
   # memory = 4096  # Memory in MB (default: 2048)
@@ -23,7 +24,8 @@ unit "proxmox_vm_1" {
   values = {
     version = local.version
 
-    vm_name = "${local.vm_name}-1"
+    env     = local.env
+    app     = "${local.app}-1"
     pool_id = local.pool_id
 
     # Optional: Customize VM resources
@@ -40,7 +42,8 @@ unit "proxmox_vm_2" {
   values = {
     version = local.version
 
-    vm_name = "${local.vm_name}-2"
+    env     = local.env
+    app     = "${local.app}-2"
     pool_id = local.pool_id
 
     # Optional: Customize VM resources
@@ -57,7 +60,7 @@ unit "dns_1" {
   values = {
     version = local.version
 
-    name = "${local.vm_name}-1"
+    name = "${local.env}-${local.app}-1"
     zone = local.zone
 
     compute_path = "../proxmox-vm-1"
@@ -72,7 +75,7 @@ unit "dns_2" {
   values = {
     version = local.version
 
-    name = "${local.vm_name}-2"
+    name = "${local.env}-${local.app}-2"
     zone = local.zone
 
     compute_path = "../proxmox-vm-2"

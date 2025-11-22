@@ -12,7 +12,8 @@ terraform {
 
 inputs = {
   # Required inputs
-  vm_name = values.vm_name
+  env = values.env
+  app = values.app
 
   # Optional inputs
   memory  = try(values.memory, 2048)

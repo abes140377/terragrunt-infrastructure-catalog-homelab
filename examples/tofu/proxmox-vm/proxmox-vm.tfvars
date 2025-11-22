@@ -1,2 +1,3 @@
-vm_name = "example-tofu-vm"
+env     = "dev"
+app     = "tofu-vm"
 pool_id = "example-tofu-pool"

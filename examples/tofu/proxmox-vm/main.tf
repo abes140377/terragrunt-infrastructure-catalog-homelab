@@ -4,6 +4,10 @@ terraform {
       source  = "bpg/proxmox"
       version = ">= 0.69.0"
     }
+    homelab = {
+      source  = "registry.terraform.io/abes140377/homelab"
+      version = "0.1.0"
+    }
   }
   required_version = ">= 1.9.0"
 }
@@ -17,8 +21,15 @@ provider "proxmox" {
   }
 }
 
-variable "vm_name" {
-  description = "The name of the virtual machine."
+provider "homelab" {}
+
+variable "env" {
+  description = "The environment this VM belongs to (e.g., dev, staging, prod)."
+  type        = string
+}
+
+variable "app" {
+  description = "The application this VM belongs to (e.g., web, db, api)."
   type        = string
 }
 
@@ -31,6 +42,7 @@ variable "pool_id" {
 module "proxmox_vm" {
   source = "../../../modules/proxmox-vm"
 
-  vm_name = var.vm_name
+  env     = var.env
+  app     = var.app
   pool_id = var.pool_id
 }

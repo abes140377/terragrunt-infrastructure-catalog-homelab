@@ -9,7 +9,7 @@ locals {
   proxmox_insecure = local.provider_config.locals.proxmox_insecure
 }
 
-# Generate Proxmox provider block
+# Generate Proxmox and Homelab provider blocks
 generate "provider" {
   path      = "provider.tf"
   if_exists = "overwrite_terragrunt"
@@ -22,6 +22,8 @@ provider "proxmox" {
     agent = true
   }
 }
+
+provider "homelab" {}
 EOF
 }
 
@@ -46,7 +48,8 @@ dependency "proxmox_pool" {
 
 inputs = {
   # Required inputs
-  vm_name = "example-terragrunt-units-proxmox-vm"
+  env = "dev"
+  app = "terragrunt-vm"
 
   # Optional inputs
   # memory = 4096  # Customize memory allocation (default: 2048MB)
