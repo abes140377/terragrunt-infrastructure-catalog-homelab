@@ -629,7 +629,7 @@ Current modules support:
   - Required inputs:
     - `env` (string): Environment name (e.g., "dev", "staging", "prod")
     - `app` (string): Application name (e.g., "web", "db", "api")
-  - Outputs: `vm_name` (generated name following pattern `<env>-<app>`)
+  - Outputs: `generated_name` (generated name following pattern `<env>-<app>`)
   - Usage: Provides consistent naming across all infrastructure resources
   - See "Custom Homelab Provider" section for more details
 

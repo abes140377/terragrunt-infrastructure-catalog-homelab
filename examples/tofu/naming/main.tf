@@ -25,5 +25,5 @@ module "naming" {
 
 output "name" {
   description = "Generated name"
-  value       = module.naming.vm_name
+  value       = module.naming.generated_name
 }
