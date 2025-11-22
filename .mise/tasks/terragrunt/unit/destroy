@@ -1,10 +1,13 @@
 #!/usr/bin/env bash
 
-set -e
-
+#MISE description "Destroy a Terragrunt unit"
 #USAGE arg "<target>" help="The target unit" default=""
 #USAGE flag "-d --dry-run" help="Show the commands without executing it"
 #USAGE flag "-a --auto-approve" help="Automatically approve the destroy action"
+
+#MISE raw=true
+
+set -e
 
 UNITS_DIR="$MISE_CONFIG_ROOT/examples/terragrunt/units"
 

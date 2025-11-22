@@ -1,8 +1,12 @@
 #!/usr/bin/env bash
-set -e
 
+#MISE description "Apply a Terragrunt unit"
 #USAGE arg "<target>" help="The target unit" default=""
 #USAGE flag "-d --dry-run" help="Show the commands without executing it"
+
+#MISE raw=true
+
+set -e
 
 UNITS_DIR="$MISE_CONFIG_ROOT/examples/terragrunt/units"
 

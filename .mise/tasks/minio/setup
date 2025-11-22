@@ -1,5 +1,9 @@
 #!/usr/bin/env bash
 
+#MISE description "Setup MinIO service account and bucket for Terraform remote state"
+
+set -e
+
 MINIO_HOST="minio.home.sflab.io"
 MINIO_PORT="9000"
 

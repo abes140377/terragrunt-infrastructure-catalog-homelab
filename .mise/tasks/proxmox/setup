@@ -1,5 +1,9 @@
 #!/usr/bin/env bash
 
+#MISE description "Setup Proxmox user and role for Terraform provisioning"
+
+set -e
+
 ROLE_NAME="TerraformProv"
 USER_NAME="terraform-prov@pve"
 

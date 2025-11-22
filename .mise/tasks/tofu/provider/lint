@@ -1,5 +1,7 @@
 #!/usr/bin/env bash
 
+#MISE description "Lint the Terraform HomeLab provider"
+
 cd $MISE_CONFIG_ROOT/providers/terraform-provider-homelab
 
 go fmt .

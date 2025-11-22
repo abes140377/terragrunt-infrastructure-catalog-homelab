@@ -1,8 +1,13 @@
 #!/usr/bin/env bash
-set -e
 
+#MISE description "Plan a Tofu unit"
 #USAGE arg "<target>" help="The target unit" default=""
 #USAGE flag "-d --dry-run" help="Show the commands without executing it"
+
+set -e
+
+# Source common functions
+source "$MISE_CONFIG_ROOT/.mise/common.sh"
 
 TOFU_DIR="$MISE_CONFIG_ROOT/examples/tofu"
 
@@ -24,16 +29,6 @@ PLAN_FILE="${selected_unit}.tfplan"
 
 CMD="tofu plan --var-file ${selected_unit}.tfvars -out=${PLAN_FILE} && tofu show -json ${PLAN_FILE} > ${PLAN_FILE}.tfgraph"
 
-echo ""
-echo "🚀 Executing..."
-echo "   Command: $CMD"
-echo "   Working dir: $(pwd)"
-echo "   Plan will be saved to file: ${PLAN_FILE}"
-echo ""
-
-if [ "$usage_dry_run" = "true" ]; then
-  echo "Dry run mode. Command not executed."
-  exit 0
-fi
+logCommand "$CMD" "$usage_dry_run"
 
 eval $CMD

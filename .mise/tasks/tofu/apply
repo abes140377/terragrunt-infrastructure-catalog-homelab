@@ -1,9 +1,14 @@
 #!/usr/bin/env bash
 
-set -e
-
+#MISE description "Apply a Tofu unit"
 #USAGE arg "<target>" help="The target unit" default=""
 #USAGE flag "-d --dry-run" help="Show the commands without executing it"
+
+#MISE raw=true
+
+set -e
+
+source "$MISE_CONFIG_ROOT/.mise/common.sh"
 
 TOFU_DIR="$MISE_CONFIG_ROOT/examples/tofu"
 
@@ -25,16 +30,6 @@ PLAN_FILE="${selected_unit}.tfplan"
 
 CMD="tofu apply ${PLAN_FILE}"
 
-echo ""
-echo "🚀 Executing..."
-echo "   Command: $CMD"
-echo "   Working dir: $(pwd)"
-echo "   Using plan from file: ${PLAN_FILE}"
-echo ""
-
-if [ "$usage_dry_run" = "true" ]; then
-  echo "Dry run mode. Command not executed."
-  exit 0
-fi
+logCommand "$CMD" "$usage_dry_run"
 
 eval $CMD

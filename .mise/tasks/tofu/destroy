@@ -1,10 +1,15 @@
 #!/usr/bin/env bash
 
-set -e
-
+#MISE description "Destroy a Tofu unit"
 #USAGE arg "<target>" help="The target unit" default=""
 #USAGE flag "-d --dry-run" help="Show the commands without executing it"
 #USAGE flag "-a --auto-approve" help="Automatically approve the apply action"
+
+#MISE raw=true
+
+set -e
+
+source "$MISE_CONFIG_ROOT/.mise/common.sh"
 
 TOFU_DIR="$MISE_CONFIG_ROOT/examples/tofu"
 
@@ -29,15 +34,6 @@ if [ "$usage_auto_approve" = "true" ]; then
   CMD="$CMD -auto-approve"
 fi
 
-echo ""
-echo "🚀 Executing..."
-echo "   Command: $CMD"
-echo "   Working dir: $(pwd)"
-echo ""
-
-if [ "$usage_dry_run" = "true" ]; then
-  echo "Dry run mode. Command not executed."
-  exit 0
-fi
+logCommand "$CMD" "$usage_dry_run"
 
 eval $CMD

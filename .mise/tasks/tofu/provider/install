@@ -1,5 +1,7 @@
 #!/usr/bin/env bash
 
+#MISE description "Install the Terraform HomeLab provider"
+
 echo "MISE_ORIGINAL_CWD=${MISE_ORIGINAL_CWD}"
 echo "MISE_CONFIG_ROOT=${MISE_CONFIG_ROOT}"
 

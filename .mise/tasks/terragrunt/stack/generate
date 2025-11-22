@@ -1,9 +1,14 @@
 #!/usr/bin/env bash
 
-set -e
-
+#MISE description "Generate a Terragrunt stack"
 #USAGE arg "<target>" help="The target unit" default=""
 #USAGE flag "-d --dry-run" help="Show the commands without executing it"
+
+#MISE raw=true
+
+set -e
+
+source "$MISE_CONFIG_ROOT/.mise/common.sh"
 
 STACKS_DIR="$MISE_CONFIG_ROOT/examples/terragrunt/stacks"
 
@@ -23,15 +28,6 @@ cd "$STACKS_DIR/$selected_stack"
 
 CMD="terragrunt stack generate"
 
-echo ""
-echo "🚀 Executing..."
-echo "   Commands: $CMD"
-echo "   Working dir: $(pwd)"
-echo ""
-
-if [ "$usage_dry_run" = "true" ]; then
-  echo "Dry run mode. Command not executed."
-  exit 0
-fi
+logCommand "$CMD" "$usage_dry_run"
 
 eval $CMD

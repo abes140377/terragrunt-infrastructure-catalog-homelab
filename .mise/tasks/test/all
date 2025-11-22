@@ -8,7 +8,10 @@ set -e
 #USAGE flag "-a --all" help="Run all tests"
 
 if [ "$usage_all" != "true" ] && [ "$usage_tofu" != "true" ] && [ "$usage_units" != "true" ] && [ "$usage_stacks" != "true" ]; then
-  echo "No test type specified. Use -a, -t, -u, or -s to specify tests to run."
+  echo ""
+  echo -e "No test type specified. \nUse -a, -t, -u, or -s to specify tests to run."
+  echo ""
+
   exit 1
 fi
 
@@ -76,7 +79,7 @@ function run_terragrunt_stack_tests() {
   for STACK in "${STACKS[@]}"; do
     # mise --raw run terragrunt:stack:plan $STACK
     # sleep 1
-    mise --raw run terragrunt:stack:apply $STACK
+    mise --raw run terragrunt:stack:apply $STACK -a
     sleep 1
   done
 
