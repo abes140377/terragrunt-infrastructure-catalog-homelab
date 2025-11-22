@@ -1,7 +1,6 @@
 resource "proxmox_virtual_environment_vm" "this" {
   name      = var.vm_name
   node_name = "pve1"
-  pool_id   = var.pool_id != "" ? var.pool_id : null
 
   clone {
     vm_id = 9002
@@ -34,4 +33,11 @@ resource "proxmox_virtual_environment_vm" "this" {
       }
     }
   }
+}
+
+resource "proxmox_virtual_environment_pool_membership" "this" {
+  count = var.pool_id != "" ? 1 : 0
+
+  pool_id = var.pool_id
+  vm_id   = proxmox_virtual_environment_vm.this.vm_id
 }
