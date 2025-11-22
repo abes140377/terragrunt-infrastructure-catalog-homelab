@@ -1,9 +1,16 @@
+module "naming" {
+  source = "../naming"
+
+  env = var.env
+  app = var.app
+}
+
 resource "proxmox_virtual_environment_container" "this" {
   node_name    = "pve1"
   unprivileged = true
 
   initialization {
-    hostname = var.hostname
+    hostname = module.naming.generated_name
 
     ip_config {
       ipv4 {

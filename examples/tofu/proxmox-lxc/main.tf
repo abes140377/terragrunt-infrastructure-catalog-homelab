@@ -17,8 +17,13 @@ provider "proxmox" {
   }
 }
 
-variable "hostname" {
-  description = "The hostname of the LXC container."
+variable "env" {
+  description = "The environment this compute resource belongs to (e.g., staging, prod)."
+  type        = string
+}
+
+variable "app" {
+  description = "The name of the application this compute resource belongs to (e.g., web, db)."
   type        = string
 }
 
@@ -31,7 +36,8 @@ variable "pool_id" {
 module "proxmox_lxc" {
   source = "../../../modules/proxmox-lxc"
 
-  hostname = var.hostname
+  env      = var.env
+  app      = var.app
   password = "StrongPassword!"
   pool_id  = var.pool_id
 }

@@ -1,2 +1,3 @@
-hostname = "example-tofu-lxc"
+env     = "example"
+app     = "tofu-lxc"
 pool_id = "example-tofu-pool"
