@@ -1,5 +1,5 @@
 locals {
-  version = "feat/next"
+  version = "main"
 
   # pool configuration
   pool_id = "example-stack-pool"
