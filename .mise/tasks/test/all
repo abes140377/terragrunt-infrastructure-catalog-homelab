@@ -33,7 +33,7 @@ UNITS=(
 
 STACKS=(
   homelab-proxmox-pool
-  # homelab-proxmox-container
+  homelab-proxmox-container
   homelab-proxmox-vm
 )
 
