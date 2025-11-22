@@ -3,6 +3,7 @@ locals {
 
   env    = values.env
   app    = values.app
+
   memory = try(values.memory, 2048)
   cores  = try(values.cores, 2)
 
@@ -43,8 +44,10 @@ unit "dns" {
   path = "dns"
 
   values = {
-    zone = local.zone
+    version = values.version
+
     name = "${local.env}-${local.app}"
+    zone = local.zone
 
     compute_path = "../proxmox-vm"
   }

@@ -1,7 +1,9 @@
 locals {
   pool_id = values.pool_id != "" ? values.pool_id : ""
 
-  hostname = values.hostname
+  env      = values.env
+  app      = values.app
+
   password = values.password
 
   zone = try(values.dns_zone, "home.sflab.io.")
@@ -15,7 +17,7 @@ unit "proxmox_pool" {
   values = {
     version = values.version
 
-    pool_id = values.pool_id
+    pool_id = local.pool_id
   }
 }
 
@@ -27,7 +29,8 @@ unit "proxmox_lxc" {
   values = {
     version = values.version
 
-    hostname = local.hostname
+    env      = local.env
+    app      = local.app
     password = local.password
     pool_id  = local.pool_id
   }
@@ -41,7 +44,7 @@ unit "dns" {
   values = {
     version = values.version
 
-    name = local.hostname
+    name = "${local.env}-${local.app}"
     zone = local.zone
 
     compute_path = "../proxmox-lxc"
