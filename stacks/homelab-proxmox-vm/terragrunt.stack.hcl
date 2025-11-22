@@ -1,9 +1,10 @@
 locals {
   pool_id = values.pool_id != "" ? values.pool_id : ""
 
-  vm_name = values.vm_name
-  memory  = try(values.memory, 2048)
-  cores   = try(values.cores, 2)
+  env    = values.env
+  app    = values.app
+  memory = try(values.memory, 2048)
+  cores  = try(values.cores, 2)
 
   zone = try(values.dns_zone, "home.sflab.io.")
 }
@@ -28,7 +29,8 @@ unit "proxmox_vm" {
   values = {
     version = values.version
 
-    vm_name = local.vm_name
+    env     = local.env
+    app     = local.app
     memory  = local.memory
     cores   = local.cores
     pool_id = local.pool_id
@@ -42,7 +44,7 @@ unit "dns" {
 
   values = {
     zone = local.zone
-    name = local.vm_name
+    name = "${local.env}-${local.app}"
 
     compute_path = "../proxmox-vm"
   }
