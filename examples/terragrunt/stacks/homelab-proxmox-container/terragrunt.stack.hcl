@@ -5,7 +5,8 @@ locals {
   pool_id = "example-stack-pool"
 
   # container configuration
-  hostname = "example-stack-container"
+  env      = "dev"
+  app      = "example"
   password = "SecurePassword123!"
 
   zone = "home.sflab.io."
@@ -19,7 +20,8 @@ unit "proxmox_lxc_1" {
   values = {
     version = local.version
 
-    hostname = "${local.hostname}-1"
+    env      = local.env
+    app      = "${local.app}-1"
     password = local.password
     pool_id  = local.pool_id
   }
@@ -33,7 +35,8 @@ unit "proxmox_lxc_2" {
   values = {
     version = local.version
 
-    hostname = "${local.hostname}-2"
+    env      = local.env
+    app      = "${local.app}-2"
     password = local.password
     pool_id  = local.pool_id
   }
@@ -47,7 +50,7 @@ unit "dns_1" {
   values = {
     version = local.version
 
-    name = "${local.hostname}-1"
+    name = "${local.env}-${local.app}-1"
     zone = local.zone
 
     compute_path = "../proxmox-lxc-1"
@@ -62,7 +65,7 @@ unit "dns_2" {
   values = {
     version = local.version
 
-    name = "${local.hostname}-2"
+    name = "${local.env}-${local.app}-2"
     zone = local.zone
 
     compute_path = "../proxmox-lxc-2"

@@ -8,7 +8,8 @@ terraform {
 
 inputs = {
   # Required inputs
-  hostname = values.hostname
+  env      = values.env
+  app      = values.app
   password = values.password
 
   # Optional inputs
