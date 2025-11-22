@@ -80,12 +80,16 @@ The `examples/` directory contains working examples for local testing:
   - `proxmox-pool`: Resource pool creation example
   - `dns`: DNS record management example
   - `naming`: Naming convention example
-- `examples/terragrunt/stacks/`: Complete stack examples using relative paths to units
+- `examples/terragrunt/stacks/`: Complete stack examples using GitHub units
   - `homelab-proxmox-pool`: Proxmox resource pool only
   - `homelab-proxmox-container`: LXC container + pool + DNS
   - `homelab-proxmox-vm`: Virtual machine + pool + DNS
+  - **Note**: Stack examples reference units from GitHub (`../../../../units/` with `ref=feat/next`)
+- `examples/terragrunt/stacks/units/`: Local unit wrappers for stack testing (uses local modules)
+  - Created for testing stacks with local module changes before pushing to GitHub
+  - Uses relative paths to local modules (e.g., `../../../../../../modules/proxmox-lxc`)
 - Unit examples use relative paths to modules (e.g., `../../../.././/modules/proxmox-lxc`)
-- Stack examples use relative paths to units (e.g., `../../../../units/proxmox-pool`)
+- Stack examples use GitHub units which fetch from `ref=feat/next` branch
 
 **Direct OpenTofu Examples** (`examples/tofu/`):
 - Direct module usage without Terragrunt wrappers
@@ -182,8 +186,14 @@ mise run terragrunt:stack:destroy
 # Generate stack locally
 mise run terragrunt:stack:generate
 
-# Run all tests
-mise run test:all
+# Run all tests (with flags: -t tofu, -u units, -s stacks, -a all)
+mise run test:all -- -t  # Run only tofu module tests
+mise run test:all -- -u  # Run only terragrunt unit tests
+mise run test:all -- -s  # Run only terragrunt stack tests (requires committed changes)
+mise run test:all -- -a  # Run all tests
+
+# Note: Stack tests require all changes to be committed and pushed to GitHub
+# because they fetch units from the remote repository (ref=feat/next)
 
 # Direct OpenTofu commands for examples/tofu
 mise run tofu:init
@@ -562,24 +572,30 @@ Current modules support:
 **Proxmox Resources:**
 
 - **LXC Containers** (`modules/proxmox-lxc`): Ubuntu 24.04 standard template on `pve1` node
-  - Resource: `proxmox_virtual_environment_container`
+  - Resources:
+    - `proxmox_virtual_environment_container` - Main container resource
+    - `proxmox_virtual_environment_pool_membership` - Pool assignment (conditional, created only if pool_id provided)
   - Required inputs: `hostname` (string), `password` (string, sensitive)
-  - Optional inputs: `pool_id` (string, default: "")
+  - Optional inputs: `pool_id` (string, default: "") - Assigns container to pool via pool_membership resource
   - Network interface: `veth0` on `vmbr0` bridge with DHCP
   - Disk: 8GB on `local-lvm` datastore
   - Unprivileged containers by default
   - Outputs: `ipv4` (container IP address)
+  - **Note**: Pool assignment uses `proxmox_virtual_environment_pool_membership` resource (not deprecated `pool_id` attribute)
 - **Virtual Machines** (`modules/proxmox-vm`): Single VM deployment on Proxmox via template cloning
-  - Resource: `proxmox_virtual_environment_vm`
+  - Resources:
+    - `proxmox_virtual_environment_vm` - Main VM resource
+    - `proxmox_virtual_environment_pool_membership` - Pool assignment (conditional, created only if pool_id provided)
   - Required inputs: `vm_name` (string)
   - Optional inputs:
     - `memory` (number, default: 2048) - Memory allocation in MB
     - `cores` (number, default: 2) - CPU cores
-    - `pool_id` (string, default: "") - Proxmox pool for resource organization
+    - `pool_id` (string, default: "") - Assigns VM to pool via pool_membership resource
   - Configuration: Clones from template VM 9002 on `pve1` node
   - Network: DHCP IPv4 configuration
   - Agent: QEMU guest agent enabled for IP address retrieval
   - Outputs: `ipv4` (VM IP address), `vm_id` (Proxmox VM ID), `vm_name` (VM name)
+  - **Note**: Pool assignment uses `proxmox_virtual_environment_pool_membership` resource (not deprecated `pool_id` attribute)
 - **Resource Pools** (`modules/proxmox-pool`): For organizing Proxmox resources
   - Resource: `proxmox_virtual_environment_pool`
   - Required inputs: `pool_id` (string)
