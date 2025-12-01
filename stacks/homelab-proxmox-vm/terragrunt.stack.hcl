@@ -7,6 +7,17 @@ locals {
   memory = try(values.memory, 2048)
   cores  = try(values.cores, 2)
 
+  # Network configuration (DHCP by default, can override with static IP)
+  # Example static IP configuration:
+  # network_config = {
+  #   type        = "static"
+  #   ip_address  = "192.168.1.100"
+  #   cidr        = 24
+  #   gateway     = "192.168.1.1"
+  #   dns_servers = ["8.8.8.8", "8.8.4.4"]  # Optional
+  # }
+  network_config = try(values.network_config, { type = "dhcp" })
+
   zone = try(values.dns_zone, "home.sflab.io.")
 }
 
@@ -30,11 +41,12 @@ unit "proxmox_vm" {
   values = {
     version = values.version
 
-    env     = local.env
-    app     = local.app
-    memory  = local.memory
-    cores   = local.cores
-    pool_id = local.pool_id
+    env            = local.env
+    app            = local.app
+    memory         = local.memory
+    cores          = local.cores
+    pool_id        = local.pool_id
+    network_config = local.network_config
   }
 }
 

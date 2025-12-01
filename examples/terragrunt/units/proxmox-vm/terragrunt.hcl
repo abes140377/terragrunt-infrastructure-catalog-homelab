@@ -57,4 +57,11 @@ inputs = {
 
   # Derived inputs
   pool_id = dependency.proxmox_pool.outputs.pool_id
+  network_config = {
+    type        = "static"
+    ip_address  = "192.168.1.33"
+    cidr        = 24
+    gateway     = "192.168.1.1"
+    # dns_servers = ["8.8.8.8", "8.8.4.4"]  # Optional
+  }
 }

@@ -19,4 +19,7 @@ inputs = {
   memory  = try(values.memory, 2048)
   cores   = try(values.cores, 2)
   pool_id = try(values.pool_id, "")
+  network_config = try(values.network_config, {
+    type = "dhcp"
+  })
 }

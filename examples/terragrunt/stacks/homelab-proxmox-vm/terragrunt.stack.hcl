@@ -31,6 +31,13 @@ unit "proxmox_vm_1" {
     # Optional: Customize VM resources
     # memory = try(local.memory, 2048)
     # cores  = try(local.cores, 2)
+    network_config = {
+      type        = "static"
+      ip_address  = "192.168.1.33"
+      cidr        = 24
+      gateway     = "192.168.1.1"
+      # dns_servers = ["8.8.8.8", "8.8.4.4"]  # Optional
+    }
   }
 }
 
@@ -49,6 +56,13 @@ unit "proxmox_vm_2" {
     # Optional: Customize VM resources
     # memory = try(local.memory, 2048)
     # cores  = try(local.cores, 2)
+    network_config = {
+      type        = "static"
+      ip_address  = "192.168.1.34"
+      cidr        = 24
+      gateway     = "192.168.1.1"
+      # dns_servers = ["8.8.8.8", "8.8.4.4"]  # Optional
+    }
   }
 }
 

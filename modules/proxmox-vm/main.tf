@@ -3,6 +3,10 @@ data "homelab_naming" "this" {
   app = var.app
 }
 
+data "local_file" "ssh_public_key" {
+  filename = "./keys/ansible_id_ecdsa.pub"
+}
+
 resource "proxmox_virtual_environment_vm" "this" {
   name      = data.homelab_naming.this.name
   node_name = "pve1"
@@ -29,13 +33,23 @@ resource "proxmox_virtual_environment_vm" "this" {
   }
 
   initialization {
-    # dns {
-    #   servers = ["1.1.1.1"]
-    # }
+    dynamic "dns" {
+      for_each = var.network_config.type == "static" && length(var.network_config.dns_servers) > 0 ? [1] : []
+      content {
+        servers = var.network_config.dns_servers
+      }
+    }
+
     ip_config {
       ipv4 {
-        address = "dhcp"
+        address = var.network_config.type == "dhcp" ? "dhcp" : "${var.network_config.ip_address}/${var.network_config.cidr}"
+        gateway = var.network_config.type == "static" ? var.network_config.gateway : null
       }
+    }
+
+    user_account {
+      username = "ansible"
+      keys     = [trimspace(data.local_file.ssh_public_key.content)]
     }
   }
 }

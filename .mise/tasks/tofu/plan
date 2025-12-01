@@ -4,6 +4,8 @@
 #USAGE arg "<target>" help="The target unit" default=""
 #USAGE flag "-d --dry-run" help="Show the commands without executing it"
 
+#MISE raw=true
+
 set -e
 
 # Source common functions
