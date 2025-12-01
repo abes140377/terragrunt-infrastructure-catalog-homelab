@@ -69,3 +69,9 @@ variable "network_config" {
     error_message = "When network_config.type is 'static', ip_address, cidr, and gateway must be provided."
   }
 }
+
+variable "ssh_public_key_path" {
+  description = "Path to the SSH public key file for Ansible access."
+  type        = string
+  default     = "./keys/ansible_id_ecdsa.pub"
+}

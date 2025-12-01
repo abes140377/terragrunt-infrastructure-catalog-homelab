@@ -4,7 +4,7 @@ data "homelab_naming" "this" {
 }
 
 data "local_file" "ssh_public_key" {
-  filename = "./keys/ansible_id_ecdsa.pub"
+  filename = var.ssh_public_key_path
 }
 
 resource "proxmox_virtual_environment_vm" "this" {

@@ -16,9 +16,10 @@ inputs = {
   app = values.app
 
   # Optional inputs
-  memory  = try(values.memory, 2048)
-  cores   = try(values.cores, 2)
-  pool_id = try(values.pool_id, "")
+  memory              = try(values.memory, 2048)
+  cores               = try(values.cores, 2)
+  pool_id             = try(values.pool_id, "")
+  ssh_public_key_path = try(values.ssh_public_key_path, "./keys/ansible_id_ecdsa.pub")
   network_config = try(values.network_config, {
     type = "dhcp"
   })
