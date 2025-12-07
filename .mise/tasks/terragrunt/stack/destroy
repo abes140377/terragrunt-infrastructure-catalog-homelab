@@ -35,15 +35,4 @@ fi
 
 logCommand "$CMD" "$usage_dry_run"
 
-if [ "$usage_auto_approve" != "true" ]; then
-  echo "⚠️ Are you really sure to destroy the stack?"
-  read -p "Type 'do it baby' to confirm: " confirm
-
-  if [[ "$confirm" != "do it baby" ]]; then
-    echo ""
-    echo "Destroy aborted by user"
-    exit 1
-  fi
-fi
-
 eval $CMD
