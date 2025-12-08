@@ -4,6 +4,10 @@ terraform {
       source  = "hashicorp/dns"
       version = ">= 3.4.0"
     }
+    homelab = {
+      source  = "registry.terraform.io/abes140377/homelab"
+      version = "0.1.0"
+    }
   }
   required_version = ">= 1.9.0"
 }
