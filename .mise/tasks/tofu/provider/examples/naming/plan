@@ -1,7 +1,0 @@
-#!/usr/bin/env bash
-
-#MISE description "Plan Terraform HomeLab provider naming data sources examples"
-
-cd $MISE_CONFIG_ROOT/providers/terraform-provider-homelab/examples/data-sources/naming
-
-TF_CLI_CONFIG_FILE=.terraformrc tofu plan

@@ -84,12 +84,9 @@ The `examples/` directory contains working examples for local testing:
   - `homelab-proxmox-pool`: Proxmox resource pool only
   - `homelab-proxmox-container`: LXC container + pool + DNS
   - `homelab-proxmox-vm`: Virtual machine + pool + DNS
-  - **Note**: Stack examples reference units from GitHub (`../../../../units/` with `ref=feat/next`)
-- `examples/terragrunt/stacks/units/`: Local unit wrappers for stack testing (uses local modules)
-  - Created for testing stacks with local module changes before pushing to GitHub
-  - Uses relative paths to local modules (e.g., `../../../../../../modules/proxmox-lxc`)
+  - **Note**: Stack examples reference units from GitHub (`../../../../units/` with `ref=main`)
 - Unit examples use relative paths to modules (e.g., `../../../.././/modules/proxmox-lxc`)
-- Stack examples use GitHub units which fetch from `ref=feat/next` branch
+- Stack examples use local units with relative paths for easier testing
 
 **Direct OpenTofu Examples** (`examples/tofu/`):
 - Direct module usage without Terragrunt wrappers
@@ -193,25 +190,13 @@ mise run test:all -- -s  # Run only terragrunt stack tests (requires committed c
 mise run test:all -- -a  # Run all tests
 
 # Note: Stack tests require all changes to be committed and pushed to GitHub
-# because they fetch units from the remote repository (ref=feat/next)
+# because they fetch units from the remote repository (ref=main)
 
 # Direct OpenTofu commands for examples/tofu
 mise run tofu:init
 mise run tofu:plan
 mise run tofu:apply
 mise run tofu:destroy
-
-# Build custom homelab provider
-mise run tofu:provider:build
-
-# Install custom homelab provider locally
-mise run tofu:provider:install
-
-# Lint custom homelab provider code
-mise run tofu:provider:lint
-
-# Test custom homelab provider naming example
-mise run tofu:provider:examples:naming:plan
 ```
 
 ### Terragrunt Operations
@@ -362,7 +347,9 @@ dependency "proxmox_pool" {
 }
 
 inputs = {
-  hostname = "example-container"
+  env      = "dev"
+  app      = "example"
+  password = "your-password"
   pool_id  = dependency.proxmox_pool.outputs.pool_id
 }
 ```
@@ -377,7 +364,8 @@ Stacks allow you to deploy multiple units together as a coordinated group. Here'
 # stacks/homelab-proxmox-container/terragrunt.stack.hcl
 locals {
   pool_id  = values.pool_id
-  hostname = values.hostname
+  env      = values.env
+  app      = values.app
   password = values.password
 }
 
@@ -395,9 +383,10 @@ unit "proxmox_lxc" {
   path   = "proxmox-lxc"  # REQUIRED: deployment path within .terragrunt-stack
 
   values = {
-    hostname        = local.hostname
-    password        = local.password
-    pool_id         = local.pool_id
+    env      = local.env
+    app      = local.app
+    password = local.password
+    pool_id  = local.pool_id
   }
 }
 
@@ -406,13 +395,10 @@ unit "dns" {
   path   = "dns"  # REQUIRED: deployment path within .terragrunt-stack
 
   values = {
-    zone           = "home.sflab.io."
-    name           = local.hostname
-    dns_server     = "192.168.1.13"
-    dns_port       = 5353
-    key_name       = "ddnskey."
-    key_algorithm  = "hmac-sha512"
-    lxc_unit_path  = "../proxmox-lxc"  # Enables dependency on LXC container IP
+    env           = local.env
+    app           = local.app
+    zone          = "home.sflab.io."
+    compute_path  = "../proxmox-lxc"  # Enables dependency on LXC container IP
   }
 }
 ```
@@ -420,18 +406,19 @@ unit "dns" {
 **Important Stack Requirements:**
 
 1. Each `unit` block **must** have a `path` attribute
-2. Dependencies between units are handled via unit paths (e.g., `lxc_unit_path`) that enable dependency blocks within units
-3. The DNS unit automatically gets the container IP through its dependency on the LXC unit
+2. Dependencies between units are handled via unit paths (e.g., `compute_path`) that enable dependency blocks within units
+3. The DNS unit automatically gets the container/VM IP through its dependency on the compute unit (LXC or VM)
 4. Use `terragrunt stack run <command>` to operate on the entire stack
 5. Stack generates units into `.terragrunt-stack/` directory (gitignored)
+6. All infrastructure resources use standardized naming: `<env>-<app>` pattern via the naming module
 
 **DNS Stack Integration:**
 
-- The `dns` unit registers the container's IP address in DNS after creation
+- The `dns` unit registers the container/VM IP address in DNS after creation
 - Set `TF_VAR_dns_key_secret` environment variable before deploying the stack
-- The DNS unit uses `lxc_unit_path` to create a dependency on the LXC container unit
-- Execution order: `proxmox_pool` → `proxmox_lxc` → `dns` (automatic via dependencies)
-- After deployment, the container is resolvable at `${hostname}.home.sflab.io`
+- The DNS unit uses `compute_path` to create a dependency on the LXC or VM unit
+- Execution order: `proxmox_pool` → `proxmox_lxc`/`proxmox_vm` → `dns` (automatic via dependencies)
+- After deployment, resources are resolvable at `${env}-${app}.home.sflab.io`
 
 **Deploying a Stack with DNS:**
 
@@ -450,59 +437,96 @@ terragrunt stack generate
 terragrunt stack run apply
 
 # Verify DNS resolution (note: DNS server runs on port 5353)
-dig example-stack-container.home.sflab.io @192.168.1.13 -p 5353
+# Example: If env=dev and app=example, the FQDN will be dev-example.home.sflab.io
+dig dev-example.home.sflab.io @192.168.1.13 -p 5353
 ```
 
-**Deploying Multiple VMs:**
+**Deploying Multiple VMs or Containers:**
 
-The proxmox-vm module follows a single-VM pattern (matching proxmox-lxc). To deploy multiple VMs:
+Both modules (proxmox-vm and proxmox-lxc) follow a single-instance pattern. To deploy multiple resources:
 
-1. **Option 1: Multiple Stack Units** - Create separate VM and DNS units for each VM in your stack:
+1. **Option 1: Multiple Stack Units** - Create separate units for each VM/container in your stack:
    ```hcl
    # Stack with multiple VMs
-   unit "proxmox_vm_web" {
-     source = "./units/proxmox-vm"
-     path   = "proxmox-vm-web"
+   unit "proxmox_vm_1" {
+     source = "../../../../units/proxmox-vm"
+     path   = "proxmox-vm-1"
      values = {
-       vm_name = "web-server"
+       env     = "dev"
+       app     = "web-1"
        memory  = 4096
        pool_id = local.pool_id
      }
    }
 
-   unit "proxmox_vm_db" {
-     source = "./units/proxmox-vm"
-     path   = "proxmox-vm-db"
+   unit "proxmox_vm_2" {
+     source = "../../../../units/proxmox-vm"
+     path   = "proxmox-vm-2"
      values = {
-       vm_name = "database"
-       memory  = 8192
+       env     = "dev"
+       app     = "web-2"
+       memory  = 4096
        pool_id = local.pool_id
      }
    }
 
    # DNS units for each VM
-   unit "dns_web" {
-     source = "./units/dns"
-     path   = "dns-web"
+   unit "dns_1" {
+     source = "../../../../units/dns"
+     path   = "dns-1"
      values = {
-       name         = "web-server"
-       vm_unit_path = "../proxmox-vm-web"
+       env          = "dev"
+       app          = "web-1"
+       zone         = "home.sflab.io."
+       compute_path = "../proxmox-vm-1"
      }
    }
 
-   unit "dns_db" {
-     source = "./units/dns"
-     path   = "dns-db"
+   unit "dns_2" {
+     source = "../../../../units/dns"
+     path   = "dns-2"
      values = {
-       name         = "database"
-       vm_unit_path = "../proxmox-vm-db"
+       env          = "dev"
+       app          = "web-2"
+       zone         = "home.sflab.io."
+       compute_path = "../proxmox-vm-2"
      }
    }
    ```
 
-2. **Option 2: Separate Deployments** - Deploy each VM as a separate stack instance
+2. **Option 2: Separate Deployments** - Deploy each VM/container as a separate stack instance
 
 This pattern maintains consistency with the LXC module and simplifies configuration.
+
+**VM Network Configuration:**
+
+The proxmox-vm module supports both DHCP (default) and static IP configuration:
+
+```hcl
+# DHCP configuration (default)
+unit "proxmox_vm" {
+  values = {
+    env = "dev"
+    app = "web"
+    # network_config defaults to DHCP
+  }
+}
+
+# Static IP configuration
+unit "proxmox_vm" {
+  values = {
+    env = "dev"
+    app = "web"
+    network_config = {
+      type        = "static"
+      ip_address  = "192.168.1.100"
+      cidr        = 24
+      gateway     = "192.168.1.1"
+      dns_servers = ["8.8.8.8", "8.8.4.4"]  # Optional
+    }
+  }
+}
+```
 
 For local testing, create example stacks in `examples/terragrunt/stacks/` with local unit wrappers that use relative paths to modules.
 
@@ -575,25 +599,36 @@ Current modules support:
   - Resources:
     - `proxmox_virtual_environment_container` - Main container resource
     - `proxmox_virtual_environment_pool_membership` - Pool assignment (conditional, created only if pool_id provided)
-  - Required inputs: `hostname` (string), `password` (string, sensitive)
+    - Uses `naming` module internally for standardized hostname generation
+  - Required inputs:
+    - `env` (string): Environment name (e.g., "dev", "staging", "prod")
+    - `app` (string): Application name (e.g., "web", "db", "api")
+    - `password` (string, sensitive): Root password for the container
   - Optional inputs: `pool_id` (string, default: "") - Assigns container to pool via pool_membership resource
   - Network interface: `veth0` on `vmbr0` bridge with DHCP
   - Disk: 8GB on `local-lvm` datastore
   - Unprivileged containers by default
+  - Hostname: Automatically generated as `<env>-<app>` via naming module
   - Outputs: `ipv4` (container IP address)
   - **Note**: Pool assignment uses `proxmox_virtual_environment_pool_membership` resource (not deprecated `pool_id` attribute)
 - **Virtual Machines** (`modules/proxmox-vm`): Single VM deployment on Proxmox via template cloning
   - Resources:
     - `proxmox_virtual_environment_vm` - Main VM resource
     - `proxmox_virtual_environment_pool_membership` - Pool assignment (conditional, created only if pool_id provided)
-  - Required inputs: `vm_name` (string)
+    - Uses `naming` module internally for standardized VM name generation
+  - Required inputs:
+    - `env` (string): Environment name (e.g., "dev", "staging", "prod")
+    - `app` (string): Application name (e.g., "web", "db", "api")
   - Optional inputs:
     - `memory` (number, default: 2048) - Memory allocation in MB
     - `cores` (number, default: 2) - CPU cores
     - `pool_id` (string, default: "") - Assigns VM to pool via pool_membership resource
+    - `network_config` (object, default: DHCP) - Network configuration supporting both DHCP and static IP
+    - `ssh_public_key_path` (string, default: "./keys/ansible_id_ecdsa.pub") - SSH public key for Ansible access
   - Configuration: Clones from template VM 9002 on `pve1` node
-  - Network: DHCP IPv4 configuration
+  - Network: Supports both DHCP (default) and static IP configuration
   - Agent: QEMU guest agent enabled for IP address retrieval
+  - VM name: Automatically generated as `<env>-<app>` via naming module
   - Outputs: `ipv4` (VM IP address), `vm_id` (Proxmox VM ID), `vm_name` (VM name)
   - **Note**: Pool assignment uses `proxmox_virtual_environment_pool_membership` resource (not deprecated `pool_id` attribute)
 - **Resource Pools** (`modules/proxmox-pool`): For organizing Proxmox resources
@@ -607,12 +642,15 @@ Current modules support:
 - **DNS A Records** (`modules/dns`): Manages DNS A records on BIND9 servers via RFC 2136 dynamic updates
   - Resource: `dns_a_record_set`
   - Provider: `hashicorp/dns` (>= 3.4.0) - configured in units, not in module
+  - Uses `naming` module internally for standardized DNS record name generation
   - Required inputs:
+    - `env` (string): Environment name (e.g., "dev", "staging", "prod")
+    - `app` (string): Application name (e.g., "web", "db", "api")
     - `zone` (string): DNS zone name (e.g., "home.sflab.io.")
-    - `name` (string): Record name within the zone
     - `addresses` (list(string)): List of IPv4 addresses
   - Optional inputs:
     - `ttl` (number, default: 300)
+  - DNS record name: Automatically generated as `<env>-<app>` via naming module
   - Outputs: `fqdn` (fully qualified domain name), `addresses` (IP addresses)
   - DNS Server Configuration (in units):
     - Server: `192.168.1.13:5353` (Port 5353, not default 53!)
@@ -624,68 +662,15 @@ Current modules support:
 **Naming Resources:**
 
 - **Resource Naming** (`modules/naming`): Wrapper around the homelab provider for standardized naming conventions
-  - Data Source: `homelab_naming` (from custom homelab provider)
-  - Provider: `abes140377/homelab` (custom provider)
+  - Data Source: `homelab_naming` (from external homelab provider)
+  - Provider: `registry.terraform.io/abes140377/homelab` (version 0.1.0)
   - Required inputs:
     - `env` (string): Environment name (e.g., "dev", "staging", "prod")
     - `app` (string): Application name (e.g., "web", "db", "api")
   - Outputs: `generated_name` (generated name following pattern `<env>-<app>`)
-  - Usage: Provides consistent naming across all infrastructure resources
-  - See "Custom Homelab Provider" section for more details
+  - Usage: Provides consistent naming across all infrastructure resources (LXC, VM, DNS)
 
-### Custom Homelab Provider
-
-This repository includes a custom Terraform/OpenTofu provider for standardized resource naming conventions:
-
-**Provider Location**: `providers/terraform-provider-homelab/`
-
-**Features:**
-- **Standardized Naming**: Generates consistent names following the pattern `<env>-<app>`
-- **Type Safety**: Terraform validates inputs at plan time
-- **Zero Configuration**: No provider-level configuration required
-- **Extensible**: Foundation for future datasources, resources, and functions
-
-**Installation:**
-
-```bash
-# Build and install the provider locally
-mise run tofu:provider:install
-
-# Verify installation
-mise run tofu:provider:examples:naming:plan
-```
-
-**Usage Example:**
-
-```hcl
-terraform {
-  required_providers {
-    homelab = {
-      source = "registry.terraform.io/abes140377/homelab"
-    }
-  }
-}
-
-provider "homelab" {}
-
-# Generate a name for a development web server
-data "homelab_naming" "dev_web" {
-  env = "dev"
-  app = "web"
-}
-
-# Use the generated name
-output "resource_name" {
-  value = data.homelab_naming.dev_web.name  # Output: "dev-web"
-}
-```
-
-**Data Source: homelab_naming**
-- `env` (String, Required): Environment name (e.g., `dev`, `staging`, `prod`)
-- `app` (String, Required): Application name (e.g., `web`, `db`, `api`)
-- `name` (String, Output): Generated name following pattern `<env>-<app>`
-
-For detailed documentation, see `providers/terraform-provider-homelab/README.md`
+**Note**: The homelab provider is published to the Terraform Registry and does not require local installation. All modules (proxmox-lxc, proxmox-vm, dns) use the naming module internally to generate standardized names from `env` and `app` inputs.
 
 ### Provider Migration Notes
 
