@@ -36,6 +36,7 @@ resource "proxmox_virtual_environment_vm" "this" {
     dynamic "dns" {
       for_each = var.network_config.type == "static" && length(var.network_config.dns_servers) > 0 ? [1] : []
       content {
+        domain  = var.network_config.domain
         servers = var.network_config.dns_servers
       }
     }

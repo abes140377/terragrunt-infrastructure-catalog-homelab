@@ -41,7 +41,8 @@ variable "network_config" {
         ip_address  = "192.168.1.100"
         cidr        = 24
         gateway     = "192.168.1.1"
-        dns_servers = ["8.8.8.8", "8.8.4.4"]  # Optional
+        dns_servers = ["8.8.8.8", "8.8.4.4"] # Optional
+        domain      = "example.com"          # Optional
       }
   EOT
   type = object({
@@ -50,9 +51,15 @@ variable "network_config" {
     cidr        = optional(number)
     gateway     = optional(string)
     dns_servers = optional(list(string), [])
+    domain      = optional(string, "home.sflab.io")
   })
   default = {
-    type = "dhcp"
+    type        = "dhcp"
+    ip_address  = null
+    cidr        = null
+    gateway     = null
+    dns_servers = []
+    domain      = null
   }
 
   validation {
