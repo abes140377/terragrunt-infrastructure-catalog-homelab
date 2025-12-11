@@ -82,3 +82,9 @@ variable "ssh_public_key_path" {
   type        = string
   default     = "./keys/ansible_id_ecdsa.pub"
 }
+
+variable "network_bridge" {
+  description = "The network bridge to connect the VM to."
+  type        = string
+  default     = "vmbr0"
+}
