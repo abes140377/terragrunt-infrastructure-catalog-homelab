@@ -192,8 +192,9 @@ mise run test:all -- -a  # Run all tests
 # Note: Stack tests require all changes to be committed and pushed to GitHub
 # because they fetch units from the remote repository (ref=main)
 
-# Direct OpenTofu commands for examples/tofu
-mise run tofu:init
+# Direct OpenTofu commands for examples/tofu (interactive selection or specify target)
+mise run tofu:init        # Interactive menu
+mise run tofu:init naming # Specific target
 mise run tofu:plan
 mise run tofu:apply
 mise run tofu:destroy
