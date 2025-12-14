@@ -54,5 +54,6 @@ inputs = {
   )
 
   # Optional inputs
-  ttl = try(values.ttl, 300)
+  wildcard = try(values.wildcard, false)
+  ttl      = try(values.ttl, 300)
 }

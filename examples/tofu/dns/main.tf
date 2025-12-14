@@ -23,15 +23,34 @@ variable "dns_key_secret" {
   type        = string
 }
 
-module "dns" {
+# Regular DNS record
+module "dns_regular" {
   source = "../../../modules/dns"
 
+  env       = "dev"
+  app       = "test"
   zone      = "home.sflab.io."
-  name      = "test"
   addresses = ["192.168.1.88"]
+  wildcard  = false # Creates: dev-test.home.sflab.io
 }
 
-output "fqdn" {
+# Wildcard DNS record
+module "dns_wildcard" {
+  source = "../../../modules/dns"
+
+  env       = "dev"
+  app       = "wildcard"
+  zone      = "home.sflab.io."
+  addresses = ["192.168.1.99"]
+  wildcard  = true # Creates: *.dev-wildcard.home.sflab.io
+}
+
+output "regular_fqdn" {
   description = "Generated FQDN"
-  value       = module.dns.fqdn
+  value       = module.dns_regular.fqdn
+}
+
+output "wildcard_fqdn" {
+  description = "Wildcard DNS record FQDN"
+  value       = module.dns_wildcard.fqdn
 }

@@ -5,7 +5,7 @@ data "homelab_naming" "this" {
 
 resource "dns_a_record_set" "this" {
   zone      = var.zone
-  name      = data.homelab_naming.this.name
+  name      = var.wildcard ? "*.${data.homelab_naming.this.name}" : data.homelab_naming.this.name
   addresses = var.addresses
   ttl       = var.ttl
 }

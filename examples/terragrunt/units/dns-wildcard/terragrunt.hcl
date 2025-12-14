@@ -11,7 +11,6 @@ locals {
   key_algorithm = "${local.dns_config.locals.key_algorithm}"
 }
 
-# Generate DNS provider block with TSIG configuration
 generate "provider" {
   path      = "provider.tf"
   if_exists = "overwrite_terragrunt"
@@ -33,10 +32,11 @@ terraform {
 }
 
 inputs = {
+  # Wildcard DNS record example
   env       = "dev"
   app       = "example"
   zone      = "home.sflab.io."
-  addresses = ["192.168.1.100"]
+  addresses = ["192.168.1.200"]
   ttl       = 300
-  wildcard  = false
+  wildcard  = true  # Creates: *.dev-example.home.sflab.io
 }

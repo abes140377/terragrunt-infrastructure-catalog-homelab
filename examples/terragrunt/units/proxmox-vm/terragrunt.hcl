@@ -57,4 +57,5 @@ inputs = {
     gateway     = "192.168.1.1"
     # dns_servers = ["8.8.8.8", "8.8.4.4"]  # Optional
   }
+  ssh_public_key_path = "./keys/ansible_id_ecdsa.pub"
 }

@@ -29,12 +29,14 @@ UNITS=(
   proxmox-vm
   proxmox-lxc
   dns
+  dns-wildcard
 )
 
 STACKS=(
   homelab-proxmox-pool
   homelab-proxmox-container
   homelab-proxmox-vm
+  homelab-wildcard-dns
 )
 
 mise run terragrunt:cleanup
@@ -60,16 +62,16 @@ function run_tofu_tests() {
 # === TERRAGRUNT UNITS ===
 function run_terragrunt_unit_tests() {
   for UNIT in "${UNITS[@]}"; do
-    # mise --raw run terragrunt:unit:plan $UNIT
+    # mise run terragrunt:unit:plan $UNIT
     # sleep 1
-    mise --raw run terragrunt:unit:apply $UNIT
+    mise run terragrunt:unit:apply $UNIT
     sleep 1
   done
 
   # Destroy in reverse order
   for (( idx=${#UNITS[@]}-1 ; idx>=0 ; idx-- )); do
     UNIT="${UNITS[idx]}"
-    mise --raw run terragrunt:unit:destroy $UNIT -a
+    mise run terragrunt:unit:destroy $UNIT -a
     sleep 1
   done
 }
@@ -85,16 +87,16 @@ function run_terragrunt_stack_tests() {
   fi
 
   for STACK in "${STACKS[@]}"; do
-    # mise --raw run terragrunt:stack:plan $STACK
+    # mise run terragrunt:stack:plan $STACK
     # sleep 1
-    mise --raw run terragrunt:stack:apply $STACK -a
+    mise run terragrunt:stack:apply $STACK -a
     sleep 1
   done
 
   # Destroy in reverse order
   for (( idx=${#STACKS[@]}-1 ; idx>=0 ; idx-- )); do
     STACK="${STACKS[idx]}"
-    mise --raw run terragrunt:stack:destroy $STACK -a
+    mise run terragrunt:stack:destroy $STACK -a
     sleep 1
   done
 }

@@ -8,15 +8,16 @@ variable "app" {
   type        = string
 }
 
+variable "wildcard" {
+  description = "Enable wildcard DNS record. When true, creates *.{env}-{app} record instead of {env}-{app}."
+  type        = bool
+  default     = false
+}
+
 variable "zone" {
   description = "The DNS zone name (e.g., 'home.sflab.io.'). Must end with a dot."
   type        = string
 }
-
-# variable "name" {
-#   description = "The DNS record name within the zone (e.g., 'server' for server.home.sflab.io)."
-#   type        = string
-# }
 
 variable "addresses" {
   description = "List of IPv4 addresses for the A record."

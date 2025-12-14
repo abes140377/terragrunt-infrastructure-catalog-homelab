@@ -53,8 +53,9 @@ variable "network_config" {
 module "proxmox_vm" {
   source = "../../../modules/proxmox-vm"
 
-  env            = var.env
-  app            = var.app
-  pool_id        = var.pool_id
-  network_config = var.network_config
+  env                 = var.env
+  app                 = var.app
+  pool_id             = var.pool_id
+  network_config      = var.network_config
+  ssh_public_key_path = "./keys/ansible_id_ecdsa.pub"
 }
