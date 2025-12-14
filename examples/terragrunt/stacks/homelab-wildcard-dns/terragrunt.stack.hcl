@@ -1,6 +1,6 @@
 locals {
   version = "main"
-  pool_id = "wildcard-test-pool"
+  pool_id = "example-stack-pool"
   env     = "dev"
   app     = "wc-test"
   password = "SecurePassword123!"

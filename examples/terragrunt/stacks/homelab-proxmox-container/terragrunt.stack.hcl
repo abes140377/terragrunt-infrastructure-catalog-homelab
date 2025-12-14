@@ -50,7 +50,8 @@ unit "dns_1" {
   values = {
     version = local.version
 
-    name = "${local.env}-${local.app}-1"
+    env  = local.env
+    app  = "${local.app}-1"
     zone = local.zone
 
     compute_path = "../proxmox-lxc-1"
@@ -65,7 +66,8 @@ unit "dns_2" {
   values = {
     version = local.version
 
-    name = "${local.env}-${local.app}-2"
+    env  = local.env
+    app  = "${local.app}-2"
     zone = local.zone
 
     compute_path = "../proxmox-lxc-2"

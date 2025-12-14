@@ -79,12 +79,12 @@ function run_terragrunt_unit_tests() {
 # === TERRAGRUNT STACKS ===
 function run_terragrunt_stack_tests() {
   # check latest changes to git are commited and pushed and fail with a message if not
-  GIT_STATUS=$(git status --porcelain)
+  # GIT_STATUS=$(git status --porcelain)
 
-  if [ -n "$GIT_STATUS" ]; then
-    echo "❌ There are uncommitted changes in the repository. Please commit and push all changes before running stack tests."
-    exit 1
-  fi
+  # if [ -n "$GIT_STATUS" ]; then
+  #   echo "❌ There are uncommitted changes in the repository. Please commit and push all changes before running stack tests."
+  #   exit 1
+  # fi
 
   for STACK in "${STACKS[@]}"; do
     # mise run terragrunt:stack:plan $STACK

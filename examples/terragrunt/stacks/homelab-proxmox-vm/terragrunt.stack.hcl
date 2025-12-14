@@ -14,6 +14,9 @@ locals {
 
   # DNS configuration
   zone = "home.sflab.io."
+
+  # SSH key configuration - use absolute path for stack deployments
+  ssh_public_key_path = "${get_repo_root()}/keys/ansible_id_ecdsa.pub"
 }
 
 unit "proxmox_vm_1" {
@@ -27,6 +30,9 @@ unit "proxmox_vm_1" {
     env     = local.env
     app     = "${local.app}-1"
     pool_id = local.pool_id
+
+    # SSH key path
+    ssh_public_key_path = local.ssh_public_key_path
 
     # Optional: Customize VM resources
     # memory = try(local.memory, 2048)
@@ -53,6 +59,9 @@ unit "proxmox_vm_2" {
     app     = "${local.app}-2"
     pool_id = local.pool_id
 
+    # SSH key path
+    ssh_public_key_path = local.ssh_public_key_path
+
     # Optional: Customize VM resources
     # memory = try(local.memory, 2048)
     # cores  = try(local.cores, 2)
@@ -74,7 +83,8 @@ unit "dns_1" {
   values = {
     version = local.version
 
-    name = "${local.env}-${local.app}-1"
+    env  = local.env
+    app  = "${local.app}-1"
     zone = local.zone
 
     compute_path = "../proxmox-vm-1"
@@ -89,7 +99,8 @@ unit "dns_2" {
   values = {
     version = local.version
 
-    name = "${local.env}-${local.app}-2"
+    env  = local.env
+    app  = "${local.app}-2"
     zone = local.zone
 
     compute_path = "../proxmox-vm-2"
