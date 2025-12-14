@@ -57,5 +57,5 @@ module "proxmox_vm" {
   app                 = var.app
   pool_id             = var.pool_id
   network_config      = var.network_config
-  ssh_public_key_path = "./keys/ansible_id_ecdsa.pub"
+  ssh_public_key_path = "${get_repo_root()}/keys/admin_id_ecdsa.pub"
 }

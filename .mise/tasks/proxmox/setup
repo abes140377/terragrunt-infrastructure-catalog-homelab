@@ -7,7 +7,7 @@ set -e
 ROLE_NAME="TerraformProv"
 USER_NAME="terraform-prov@pve"
 
-ssh -i ./keys/ansible_id_ecdsa root@proxmox.home.sflab.io << EOF
+ssh -i ./keys/admin_id_ecdsa root@proxmox.home.sflab.io << EOF
 
 pveum role list | grep "$ROLE_NAME" > /dev/null 2>&1
 

@@ -79,11 +79,13 @@ The `examples/` directory contains working examples for local testing:
   - `proxmox-vm`: Virtual machine deployment example
   - `proxmox-pool`: Resource pool creation example
   - `dns`: DNS record management example
+  - `dns-wildcard`: Wildcard DNS record example (creates `*.{env}-{app}` records)
   - `naming`: Naming convention example
 - `examples/terragrunt/stacks/`: Complete stack examples using GitHub units
   - `homelab-proxmox-pool`: Proxmox resource pool only
   - `homelab-proxmox-container`: LXC container + pool + DNS
-  - `homelab-proxmox-vm`: Virtual machine + pool + DNS
+  - `homelab-proxmox-vm`: Virtual machine + pool + DNS (requires SSH key configuration)
+  - `homelab-wildcard-dns`: LXC container with both regular and wildcard DNS records
   - **Note**: Stack examples reference units from GitHub (`../../../../units/` with `ref=main`)
 - Unit examples use relative paths to modules (e.g., `../../../.././/modules/proxmox-lxc`)
 - Stack examples use local units with relative paths for easier testing
@@ -299,9 +301,9 @@ pre-commit run --all-files
 
 Examples:
 - `units/proxmox-lxc/terragrunt.hcl`: LXC container unit
-- `units/proxmox-vm/terragrunt.hcl`: Virtual machine unit
+- `units/proxmox-vm/terragrunt.hcl`: Virtual machine unit (requires `ssh_public_key_path`)
 - `units/proxmox-pool/terragrunt.hcl`: Resource pool unit
-- `units/dns/terragrunt.hcl`: DNS record unit
+- `units/dns/terragrunt.hcl`: DNS record unit (supports both regular and wildcard DNS records via `wildcard` parameter)
 - `units/naming/terragrunt.hcl`: Naming convention unit
 
 ### Adding New Stacks
@@ -318,8 +320,9 @@ Examples:
    - Concrete values in `locals` block
 
 Examples:
+- `stacks/homelab-proxmox-pool/`: Proxmox resource pool only
 - `stacks/homelab-proxmox-container/`: LXC container stack with pool and DNS
-- `stacks/homelab-proxmox-vm/`: Virtual machine stack with pool and DNS
+- `stacks/homelab-proxmox-vm/`: Virtual machine stack with pool and DNS (requires SSH key path configuration)
 
 ### Working with Dependencies
 
@@ -531,6 +534,70 @@ unit "proxmox_vm" {
 
 For local testing, create example stacks in `examples/terragrunt/stacks/` with local unit wrappers that use relative paths to modules.
 
+### SSH Key Configuration for VM Stacks
+
+**IMPORTANT**: When deploying VM stacks, SSH keys must be configured with **absolute paths** because:
+- Stacks fetch units from GitHub and execute them in `.terragrunt-cache` directories
+- Relative paths like `./keys/admin_id_ecdsa.pub` don't work in cache directories
+- The `keys/` directory only exists in the repository root
+
+**Solution**: Use `get_repo_root()` to create absolute paths in stack configurations:
+
+```hcl
+# In terragrunt.stack.hcl
+locals {
+  # SSH key configuration - use absolute path for stack deployments
+  ssh_public_key_path = "${get_repo_root()}/keys/admin_id_ecdsa.pub"
+}
+
+unit "proxmox_vm" {
+  source = "../../../../units/proxmox-vm"
+  path   = "proxmox-vm"
+
+  values = {
+    env                 = "dev"
+    app                 = "web"
+    ssh_public_key_path = local.ssh_public_key_path  # Pass absolute path
+  }
+}
+```
+
+**Available SSH Keys** (in `keys/` directory):
+- `admin_id_ecdsa.pub`: ECDSA public key for admin user SSH access
+
+### Wildcard DNS Records
+
+The DNS module supports creating wildcard DNS records that match all subdomains under a specific pattern.
+
+**Regular DNS Record** (default):
+- Creates: `{env}-{app}.home.sflab.io`
+- Example: `dev-web.home.sflab.io`
+
+**Wildcard DNS Record** (when `wildcard = true`):
+- Creates: `*.{env}-{app}.home.sflab.io`
+- Example: `*.dev-web.home.sflab.io`
+- Matches: `anything.dev-web.home.sflab.io`, `api.dev-web.home.sflab.io`, etc.
+
+**Usage Example:**
+
+```hcl
+# In a stack or unit
+unit "dns_wildcard" {
+  source = "../../../../units/dns"
+  path   = "dns-wildcard"
+
+  values = {
+    env          = "dev"
+    app          = "web"
+    zone         = "home.sflab.io."
+    wildcard     = true  # Creates *.dev-web.home.sflab.io
+    compute_path = "../proxmox-lxc"  # Get IP from LXC container
+  }
+}
+```
+
+**Example Stack**: See `examples/terragrunt/stacks/homelab-wildcard-dns/` for a complete example with both regular and wildcard DNS records.
+
 ### Passing Variables to Modules
 
 Variables can be passed to Terraform modules in several ways:
@@ -625,7 +692,8 @@ Current modules support:
     - `cores` (number, default: 2) - CPU cores
     - `pool_id` (string, default: "") - Assigns VM to pool via pool_membership resource
     - `network_config` (object, default: DHCP) - Network configuration supporting both DHCP and static IP
-    - `ssh_public_key_path` (string, default: "./keys/ansible_id_ecdsa.pub") - SSH public key for Ansible access
+    - `ssh_public_key_path` (string, required) - SSH public key for admin user access (no default)
+    - `username` (string, default: "admin") - Username for SSH access
   - Configuration: Clones from template VM 9002 on `pve1` node
   - Network: Supports both DHCP (default) and static IP configuration
   - Agent: QEMU guest agent enabled for IP address retrieval
@@ -651,7 +719,8 @@ Current modules support:
     - `addresses` (list(string)): List of IPv4 addresses
   - Optional inputs:
     - `ttl` (number, default: 300)
-  - DNS record name: Automatically generated as `<env>-<app>` via naming module
+    - `wildcard` (bool, default: false) - Creates wildcard DNS record `*.{env}-{app}` instead of `{env}-{app}`
+  - DNS record name: Automatically generated as `<env>-<app>` via naming module (or `*.<env>-<app>` if wildcard is true)
   - Outputs: `fqdn` (fully qualified domain name), `addresses` (IP addresses)
   - DNS Server Configuration (in units):
     - Server: `192.168.1.13:5353` (Port 5353, not default 53!)

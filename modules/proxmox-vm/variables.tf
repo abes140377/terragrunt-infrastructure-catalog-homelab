@@ -84,9 +84,8 @@ variable "username" {
 }
 
 variable "ssh_public_key_path" {
-  description = "Path to the SSH public key file for Ansible access."
+  description = "Path to the SSH public key file for SSH access."
   type        = string
-  # default     = "./keys/ansible_id_ecdsa.pub"
 }
 
 variable "network_bridge" {

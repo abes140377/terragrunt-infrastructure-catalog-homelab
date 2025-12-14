@@ -16,7 +16,7 @@ locals {
   zone = "home.sflab.io."
 
   # SSH key configuration - use absolute path for stack deployments
-  ssh_public_key_path = "${get_repo_root()}/keys/ansible_id_ecdsa.pub"
+  ssh_public_key_path = "${get_repo_root()}/keys/admin_id_ecdsa.pub"
 }
 
 unit "proxmox_vm_1" {

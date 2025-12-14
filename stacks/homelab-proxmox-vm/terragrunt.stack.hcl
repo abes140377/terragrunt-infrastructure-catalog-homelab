@@ -7,8 +7,8 @@ locals {
   memory = try(values.memory, 2048)
   cores  = try(values.cores, 2)
 
-  # SSH public key path for Ansible access
-  ssh_public_key_path = try(values.ssh_public_key_path, "./keys/ansible_id_ecdsa.pub")
+  # SSH public key path for SSH access
+  ssh_public_key_path = "${get_repo_root()}/keys/admin_id_ecdsa.pub"
 
   # Network configuration (DHCP by default, can override with static IP)
   # Example static IP configuration:
