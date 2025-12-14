@@ -1,6 +1,6 @@
 output "fqdn" {
   description = "Fully qualified domain name of the DNS record."
-  value       = "${dns_a_record_set.this.name}.${dns_a_record_set.this.zone}"
+  value       = var.wildcard ? "*.${dns_a_record_set.this.zone}.${dns_a_record_set.this.zone}" : "${dns_a_record_set.this.name}.${dns_a_record_set.this.zone}"
 }
 
 output "addresses" {
