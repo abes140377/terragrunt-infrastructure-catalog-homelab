@@ -20,32 +20,20 @@ unit "proxmox_lxc" {
   }
 }
 
-# Regular DNS record for direct access
-unit "dns_regular" {
+# DNS records - creates both normal and wildcard records
+unit "dns" {
   source = "../../../../units/dns"
-  path   = "dns-regular"
+  path   = "dns"
 
   values = {
     version      = local.version
     env          = local.env
     app          = local.app
     zone         = local.zone
-    wildcard     = false
-    compute_path = "../proxmox-lxc"
-  }
-}
-
-# Wildcard DNS record for all subdomains
-unit "dns_wildcard" {
-  source = "../../../../units/dns"
-  path   = "dns-wildcard"
-
-  values = {
-    version      = local.version
-    env          = local.env
-    app          = local.app
-    zone         = local.zone
-    wildcard     = true
+    record_types = {
+      normal   = true
+      wildcard = true
+    }
     compute_path = "../proxmox-lxc"
   }
 }

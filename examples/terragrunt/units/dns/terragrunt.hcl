@@ -38,5 +38,6 @@ inputs = {
   zone      = "home.sflab.io."
   addresses = ["192.168.1.100"]
   ttl       = 300
-  wildcard  = false
+  # record_types uses default: { normal = true, wildcard = false }
+  # Creates: dev-example.home.sflab.io
 }

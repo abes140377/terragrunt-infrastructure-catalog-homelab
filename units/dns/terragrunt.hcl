@@ -54,6 +54,9 @@ inputs = {
   )
 
   # Optional inputs
-  wildcard = try(values.wildcard, false)
-  ttl      = try(values.ttl, 300)
+  record_types = try(values.record_types, {
+    normal   = true
+    wildcard = false
+  })
+  ttl = try(values.ttl, 300)
 }

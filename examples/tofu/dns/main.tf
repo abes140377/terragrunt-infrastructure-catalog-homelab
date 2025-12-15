@@ -23,7 +23,7 @@ variable "dns_key_secret" {
   type        = string
 }
 
-# Regular DNS record
+# Example 1: Regular DNS record only (default behavior)
 module "dns_regular" {
   source = "../../../modules/dns"
 
@@ -31,10 +31,11 @@ module "dns_regular" {
   app       = "test"
   zone      = "home.sflab.io."
   addresses = ["192.168.1.88"]
-  wildcard  = false # Creates: dev-test.home.sflab.io
+  # record_types uses default: { normal = true, wildcard = false }
+  # Creates: dev-test.home.sflab.io
 }
 
-# Wildcard DNS record
+# Example 2: Wildcard DNS record only
 module "dns_wildcard" {
   source = "../../../modules/dns"
 
@@ -42,15 +43,46 @@ module "dns_wildcard" {
   app       = "wildcard"
   zone      = "home.sflab.io."
   addresses = ["192.168.1.99"]
-  wildcard  = true # Creates: *.dev-wildcard.home.sflab.io
+  record_types = {
+    normal   = false
+    wildcard = true
+  }
+  # Creates: *.dev-wildcard.home.sflab.io
+}
+
+# Example 3: Both regular and wildcard DNS records
+module "dns_both" {
+  source = "../../../modules/dns"
+
+  env       = "dev"
+  app       = "dual"
+  zone      = "home.sflab.io."
+  addresses = ["192.168.1.77"]
+  record_types = {
+    normal   = true
+    wildcard = true
+  }
+  # Creates both:
+  #   dev-dual.home.sflab.io
+  #   *.dev-dual.home.sflab.io
 }
 
 output "regular_fqdn" {
-  description = "Generated FQDN"
+  description = "Regular DNS record FQDN"
   value       = module.dns_regular.fqdn
 }
 
-output "wildcard_fqdn" {
-  description = "Wildcard DNS record FQDN"
-  value       = module.dns_wildcard.fqdn
+output "wildcard_only_fqdn" {
+  description = "Wildcard-only DNS record FQDN"
+  value       = module.dns_wildcard.fqdn_wildcard
+}
+
+output "both_fqdn_normal" {
+  description = "Dual example - normal FQDN"
+  value       = module.dns_both.fqdn
+}
+
+output "both_fqdn_wildcard" {
+  description = "Dual example - wildcard FQDN"
+  value       = module.dns_both.fqdn_wildcard
 }
