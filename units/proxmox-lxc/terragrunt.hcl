@@ -8,9 +8,10 @@ terraform {
 
 inputs = {
   # Required inputs
-  env      = values.env
-  app      = values.app
-  password = values.password
+  env                 = values.env
+  app                 = values.app
+  password            = values.password
+  ssh_public_key_path = "${get_repo_root()}/keys/admin_id_ecdsa.pub"
 
   # Optional inputs
   pool_id = try(values.pool_id, "")
