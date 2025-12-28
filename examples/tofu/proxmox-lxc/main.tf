@@ -36,8 +36,9 @@ variable "pool_id" {
 module "proxmox_lxc" {
   source = "../../../modules/proxmox-lxc"
 
-  env      = var.env
-  app      = var.app
-  password = "StrongPassword!"
-  pool_id  = var.pool_id
+  env                 = var.env
+  app                 = var.app
+  password            = "StrongPassword!"
+  pool_id             = var.pool_id
+  ssh_public_key_path = "${path.module}/../../../keys/admin_id_ecdsa.pub"
 }

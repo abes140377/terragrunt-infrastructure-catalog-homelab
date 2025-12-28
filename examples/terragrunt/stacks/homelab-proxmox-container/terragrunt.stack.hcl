@@ -10,6 +10,9 @@ locals {
   password = "SecurePassword123!"
 
   zone = "home.sflab.io."
+
+  # SSH key configuration - use absolute path for stack deployments
+  ssh_public_key_path = "${get_repo_root()}/keys/admin_id_ecdsa.pub"
 }
 
 unit "proxmox_lxc_1" {
@@ -24,6 +27,9 @@ unit "proxmox_lxc_1" {
     app      = "${local.app}-1"
     password = local.password
     pool_id  = local.pool_id
+
+    # SSH key path
+    ssh_public_key_path = local.ssh_public_key_path
   }
 }
 
@@ -39,6 +45,9 @@ unit "proxmox_lxc_2" {
     app      = "${local.app}-2"
     password = local.password
     pool_id  = local.pool_id
+
+    # SSH key path
+    ssh_public_key_path = local.ssh_public_key_path
   }
 }
 

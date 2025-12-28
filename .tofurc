@@ -1,0 +1,31 @@
+# OpenTofu/Terraform configuration for local provider development
+#
+# This configuration uses filesystem_mirror to load the homelab provider from a local directory.
+# This approach works better with Terragrunt than dev_overrides because it allows `tofu init`
+# to run without trying to query the Terraform Registry.
+#
+# To update the provider:
+# 1. Run `mise run provider:install` in the provider directory to build the provider and to copy it to the plugins directory
+# 3. Run `mise run terragrunt:cleanup` to clear caches (if needed)
+# 4. Run `mise run terragrunt:stack:apply` to apply your stack
+#
+
+provider_installation {
+  filesystem_mirror {
+    path    = "/Users/seba/.local/share/opentofu/plugins"
+    include = ["registry.terraform.io/abes140377/*"]
+  }
+
+  direct {
+    exclude = ["registry.terraform.io/abes140377/*"]
+  }
+}
+
+# provider_installation {
+#   dev_overrides {
+#     "registry.terraform.io/abes140377/homelab" = "/Users/seba/.local/share/mise/installs/go/1.24.2/bin"
+#   }
+#
+#   # For all other providers, install them directly as normal.
+#   direct {}
+# }

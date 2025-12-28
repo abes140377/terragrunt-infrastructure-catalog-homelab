@@ -1,8 +1,10 @@
-module "naming" {
-  source = "../naming"
-
+data "homelab_naming" "this" {
   env = var.env
   app = var.app
+}
+
+data "local_file" "ssh_public_key" {
+  filename = var.ssh_public_key_path
 }
 
 resource "proxmox_virtual_environment_container" "this" {
@@ -10,7 +12,7 @@ resource "proxmox_virtual_environment_container" "this" {
   unprivileged = true
 
   initialization {
-    hostname = module.naming.generated_name
+    hostname = data.homelab_naming.this.name
 
     ip_config {
       ipv4 {
@@ -20,6 +22,7 @@ resource "proxmox_virtual_environment_container" "this" {
 
     user_account {
       password = var.password
+      keys     = [trimspace(data.local_file.ssh_public_key.content)]
     }
   }
 

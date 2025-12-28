@@ -56,6 +56,8 @@ inputs = {
   env = "dev"
   app = "terragrunt-lxc"
 
+  ssh_public_key_path = "${get_repo_root()}/keys/admin_id_ecdsa.pub"
+
   # Derived inputs
   pool_id = dependency.proxmox_pool.outputs.pool_id
 }

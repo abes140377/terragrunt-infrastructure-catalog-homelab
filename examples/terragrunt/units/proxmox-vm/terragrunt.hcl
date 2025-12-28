@@ -44,9 +44,11 @@ inputs = {
   env = "dev"
   app = "terragrunt-vm"
 
+  ssh_public_key_path = "${get_repo_root()}/keys/admin_id_ecdsa.pub"
+
   # Optional inputs
-  # memory = 4096  # Customize memory allocation (default: 2048MB)
-  # cores  = 4     # Customize CPU cores (default: 2)
+  # memory = 4096 # Customize memory allocation (default: 2048MB)
+  # cores  = 4    # Customize CPU cores (default: 2)
 
   # Derived inputs
   pool_id = dependency.proxmox_pool.outputs.pool_id
@@ -57,5 +59,4 @@ inputs = {
     gateway     = "192.168.1.1"
     # dns_servers = ["8.8.8.8", "8.8.4.4"]  # Optional
   }
-  ssh_public_key_path = "${get_repo_root()}/keys/admin_id_ecdsa.pub"
 }

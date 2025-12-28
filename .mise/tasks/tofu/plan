@@ -14,22 +14,22 @@ source "$MISE_CONFIG_ROOT/.mise/common.sh"
 TOFU_DIR="$MISE_CONFIG_ROOT/examples/tofu"
 
 if [[ -z "${usage_target:-}" ]]; then
-  unit_dirs=()
+  module_dirs=()
 
   while IFS= read -r -d '' dir; do
-    unit_dirs+=("$(basename "$dir")")
+    module_dirs+=("$(basename "$dir")")
   done < <(find "$TOFU_DIR" -mindepth 1 -maxdepth 1 -type d -print0)
 
-  selected_unit=$(printf "%s\n" "${unit_dirs[@]}" | gum choose --header="Select a unit to operate on:")
+  selected_module=$(printf "%s\n" "${module_dirs[@]}" | gum choose --header="Select a module to operate on:")
 else
-  selected_unit+=("${usage_target}")
+  selected_module+=("${usage_target}")
 fi
 
-cd "$TOFU_DIR/$selected_unit"
+cd "$TOFU_DIR/$selected_module"
 
-PLAN_FILE="${selected_unit}.tfplan"
+PLAN_FILE="${selected_module}.tfplan"
 
-CMD="tofu plan --var-file ${selected_unit}.tfvars -out=${PLAN_FILE} && tofu show -json ${PLAN_FILE} > ${PLAN_FILE}.tfgraph"
+CMD="tofu plan --var-file ${selected_module}.tfvars -out=${PLAN_FILE} && tofu show -json ${PLAN_FILE} > ${PLAN_FILE}.tfgraph"
 
 logCommand "$CMD" "$usage_dry_run"
 
