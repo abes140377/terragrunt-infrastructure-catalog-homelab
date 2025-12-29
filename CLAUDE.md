@@ -762,7 +762,7 @@ Current modules support:
 
 - **Resource Naming** (`modules/naming`): Wrapper around the homelab provider for standardized naming conventions
   - Data Source: `homelab_naming` (from external homelab provider)
-  - Provider: `registry.terraform.io/sflab-io/homelab` (version >= 0.2.0)
+  - Provider: `registry.terraform.io/sflab-io/homelab` (version >= 0.3.0)
   - Required inputs:
     - `env` (string): Environment name (e.g., "dev", "staging", "prod")
     - `app` (string): Application name (e.g., "web", "db", "api")
