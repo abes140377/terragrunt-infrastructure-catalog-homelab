@@ -10,7 +10,7 @@ locals {
 }
 
 unit "proxmox_pool" {
-  source = "git::git@github.com:abes140377/terragrunt-infrastructure-catalog-homelab.git//units/proxmox-pool?ref=${values.version}"
+  source = "git::git@github.com:sflab-io/terragrunt-infrastructure-catalog-homelab.git//units/proxmox-pool?ref=${values.version}"
 
   path = "proxmox-pool"
 
@@ -22,7 +22,7 @@ unit "proxmox_pool" {
 }
 
 unit "proxmox_lxc" {
-  source = "git::git@github.com:abes140377/terragrunt-infrastructure-catalog-homelab.git//units/proxmox-lxc?ref=${values.version}"
+  source = "git::git@github.com:sflab-io/terragrunt-infrastructure-catalog-homelab.git//units/proxmox-lxc?ref=${values.version}"
 
   path = "proxmox-lxc"
 
@@ -37,7 +37,7 @@ unit "proxmox_lxc" {
 }
 
 unit "dns" {
-  source = "git::git@github.com:abes140377/terragrunt-infrastructure-catalog-homelab.git//units/dns?ref=${values.version}"
+  source = "git::git@github.com:sflab-io/terragrunt-infrastructure-catalog-homelab.git//units/dns?ref=${values.version}"
 
   path = "dns"
 

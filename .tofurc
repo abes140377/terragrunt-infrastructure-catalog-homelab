@@ -13,17 +13,17 @@
 provider_installation {
   filesystem_mirror {
     path    = "/Users/seba/.local/share/opentofu/plugins"
-    include = ["registry.terraform.io/abes140377/*"]
+    include = ["registry.terraform.io/sflab-io/*"]
   }
 
   direct {
-    exclude = ["registry.terraform.io/abes140377/*"]
+    exclude = ["registry.terraform.io/sflab-io/*"]
   }
 }
 
 # provider_installation {
 #   dev_overrides {
-#     "registry.terraform.io/abes140377/homelab" = "/Users/seba/.local/share/mise/installs/go/1.24.2/bin"
+#     "registry.terraform.io/sflab-io/homelab" = "/Users/seba/.local/share/mise/installs/go/1.24.2/bin"
 #   }
 #
 #   # For all other providers, install them directly as normal.

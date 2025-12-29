@@ -79,7 +79,7 @@ The DNS unit SHALL wrap the DNS module following the Terragrunt unit pattern use
 #### Scenario: Unit source reference
 
 - **WHEN** the unit is defined for external consumption
-- **THEN** it SHALL use a Git URL source: `git::git@github.com:abes140377/terragrunt-infrastructure-catalog-homelab.git//modules/dns?ref=${values.version}`
+- **THEN** it SHALL use a Git URL source: `git::git@github.com:sflab-io/terragrunt-infrastructure-catalog-homelab.git//modules/dns?ref=${values.version}`
 - **AND** include a comment explaining the Git URL pattern
 
 #### Scenario: Unit parameterization

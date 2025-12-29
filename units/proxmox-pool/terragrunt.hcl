@@ -8,7 +8,7 @@ include "provider_proxmox" {
 }
 
 terraform {
-  source = "git::git@github.com:abes140377/terragrunt-infrastructure-catalog-homelab.git//modules/proxmox-pool?ref=${values.version}"
+  source = "git::git@github.com:sflab-io/terragrunt-infrastructure-catalog-homelab.git//modules/proxmox-pool?ref=${values.version}"
 }
 
 inputs = {

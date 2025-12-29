@@ -3,7 +3,7 @@
 ## 1. Project Setup
 
 - [x] 1.1 Create `./providers/terraform-provider-homelab/` directory
-- [x] 1.2 Initialize Go module with `go mod init github.com/abes140377/terraform-provider-homelab`
+- [x] 1.2 Initialize Go module with `go mod init github.com/sflab-io/terraform-provider-homelab`
 - [x] 1.3 Set Go version to 1.24.2 in `go.mod`
 - [x] 1.4 Add Terraform Plugin Framework dependency
 - [x] 1.5 Create `internal/provider/` directory structure

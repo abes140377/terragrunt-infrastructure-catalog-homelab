@@ -10,7 +10,7 @@ terraform {
   //
   // Assume that a user consuming this unit will exclusively have access
   // to the directory this file is in, and nothing else in this repository.
-  source = "git::git@github.com:abes140377/terragrunt-infrastructure-catalog-homelab.git//modules/naming?ref=${values.version}"
+  source = "git::git@github.com:sflab-io/terragrunt-infrastructure-catalog-homelab.git//modules/naming?ref=${values.version}"
 }
 
 inputs = {

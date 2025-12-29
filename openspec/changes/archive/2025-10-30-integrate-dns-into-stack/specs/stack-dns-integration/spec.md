@@ -7,7 +7,7 @@ The `homelab-proxmox-container` stack SHALL integrate the DNS unit to automatica
 #### Scenario: Production stack DNS unit configuration
 
 - **WHEN** the production stack at `stacks/homelab-proxmox-container/terragrunt.stack.hcl` is defined
-- **THEN** it SHALL include a DNS unit with Git URL source `git::git@github.com:abes140377/terragrunt-infrastructure-catalog-homelab.git//units/dns?ref=${values.version}`
+- **THEN** it SHALL include a DNS unit with Git URL source `git::git@github.com:sflab-io/terragrunt-infrastructure-catalog-homelab.git//units/dns?ref=${values.version}`
 - **AND** the DNS unit SHALL have a `path` attribute set to `dns`
 - **AND** the DNS unit SHALL receive values for: zone, name, addresses, dns_server, key_name, key_algorithm, key_secret
 

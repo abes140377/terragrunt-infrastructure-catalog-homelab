@@ -16,7 +16,7 @@ The catalog SHALL provide a Terragrunt unit that wraps the existing proxmox-vm m
 #### Scenario: VM unit source reference
 
 - **WHEN** the unit is defined for external consumption
-- **THEN** it SHALL use a Git URL source: `git::git@github.com:abes140377/terragrunt-infrastructure-catalog-homelab.git//modules/proxmox-vm?ref=${values.version}`
+- **THEN** it SHALL use a Git URL source: `git::git@github.com:sflab-io/terragrunt-infrastructure-catalog-homelab.git//modules/proxmox-vm?ref=${values.version}`
 - **AND** include a comment explaining the Git URL pattern for shallow directory consumption
 
 #### Scenario: VM unit parameterization
@@ -108,9 +108,9 @@ The catalog SHALL provide a reusable stack that composes proxmox-pool, proxmox-v
 
 - **WHEN** the stack references units
 - **THEN** it SHALL use Git URLs for external consumption:
-  - `git::git@github.com:abes140377/terragrunt-infrastructure-catalog-homelab.git//units/proxmox-pool?ref=${values.version}`
-  - `git::git@github.com:abes140377/terragrunt-infrastructure-catalog-homelab.git//units/proxmox-vm?ref=${values.version}`
-  - `git::git@github.com:abes140377/terragrunt-infrastructure-catalog-homelab.git//units/dns?ref=${values.version}`
+  - `git::git@github.com:sflab-io/terragrunt-infrastructure-catalog-homelab.git//units/proxmox-pool?ref=${values.version}`
+  - `git::git@github.com:sflab-io/terragrunt-infrastructure-catalog-homelab.git//units/proxmox-vm?ref=${values.version}`
+  - `git::git@github.com:sflab-io/terragrunt-infrastructure-catalog-homelab.git//units/dns?ref=${values.version}`
 - **AND** include comments explaining the Git URL pattern
 
 #### Scenario: Stack dependency configuration

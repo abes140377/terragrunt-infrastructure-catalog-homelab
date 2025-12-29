@@ -380,7 +380,7 @@ locals {
 }
 
 unit "proxmox_pool" {
-  source = "git::git@github.com:abes140377/terragrunt-infrastructure-catalog-homelab.git//units/proxmox-pool?ref=${values.version}"
+  source = "git::git@github.com:sflab-io/terragrunt-infrastructure-catalog-homelab.git//units/proxmox-pool?ref=${values.version}"
   path   = "proxmox-pool"  # REQUIRED: deployment path within .terragrunt-stack
 
   values = {
@@ -389,7 +389,7 @@ unit "proxmox_pool" {
 }
 
 unit "proxmox_lxc" {
-  source = "git::git@github.com:abes140377/terragrunt-infrastructure-catalog-homelab.git//units/proxmox-lxc?ref=${values.version}"
+  source = "git::git@github.com:sflab-io/terragrunt-infrastructure-catalog-homelab.git//units/proxmox-lxc?ref=${values.version}"
   path   = "proxmox-lxc"  # REQUIRED: deployment path within .terragrunt-stack
 
   values = {
@@ -401,7 +401,7 @@ unit "proxmox_lxc" {
 }
 
 unit "dns" {
-  source = "git::git@github.com:abes140377/terragrunt-infrastructure-catalog-homelab.git//units/dns?ref=${values.version}"
+  source = "git::git@github.com:sflab-io/terragrunt-infrastructure-catalog-homelab.git//units/dns?ref=${values.version}"
   path   = "dns"  # REQUIRED: deployment path within .terragrunt-stack
 
   values = {
@@ -762,7 +762,7 @@ Current modules support:
 
 - **Resource Naming** (`modules/naming`): Wrapper around the homelab provider for standardized naming conventions
   - Data Source: `homelab_naming` (from external homelab provider)
-  - Provider: `registry.terraform.io/abes140377/homelab` (version >= 0.2.0)
+  - Provider: `registry.terraform.io/sflab-io/homelab` (version >= 0.2.0)
   - Required inputs:
     - `env` (string): Environment name (e.g., "dev", "staging", "prod")
     - `app` (string): Application name (e.g., "web", "db", "api")

@@ -62,7 +62,7 @@ The proxmox-vm unit SHALL maintain consistency with existing unit patterns while
 - **WHEN** the unit is defined
 - **THEN** it SHALL include the root configuration via `include "root"`
 - **AND** SHALL include the Proxmox provider configuration via `include "provider_proxmox"`
-- **AND** SHALL use Git URL source for external consumption: `git::git@github.com:abes140377/terragrunt-infrastructure-catalog-homelab.git//modules/proxmox-vm?ref=${values.version}`
+- **AND** SHALL use Git URL source for external consumption: `git::git@github.com:sflab-io/terragrunt-infrastructure-catalog-homelab.git//modules/proxmox-vm?ref=${values.version}`
 
 #### Scenario: Required values
 

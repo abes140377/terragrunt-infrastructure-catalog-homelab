@@ -80,9 +80,9 @@ A custom Terraform provider offers:
 
 ### Decision: Go Module Path
 
-**Why**: Using `github.com/abes140377/terraform-provider-homelab` as the module path follows Go conventions and aligns with the repository owner. This makes the eventual transition to a separate repository easier if needed.
+**Why**: Using `github.com/sflab-io/terraform-provider-homelab` as the module path follows Go conventions and aligns with the repository owner. This makes the eventual transition to a separate repository easier if needed.
 
-**Module path**: `github.com/abes140377/terraform-provider-homelab`
+**Module path**: `github.com/sflab-io/terraform-provider-homelab`
 
 ### Decision: Provider Name "homelab"
 
@@ -163,7 +163,7 @@ A custom Terraform provider offers:
 ```hcl
   provider_installation {
     dev_overrides {
-      "registry.terraform.io/abes140377/homelab" = "/path/to/go/bin"
+      "registry.terraform.io/sflab-io/homelab" = "/path/to/go/bin"
     }
     direct {}
   }
