@@ -53,7 +53,7 @@ Run `mise install` to install all required tools.
    - `proxmox-lxc`: Creates LXC containers on Proxmox
    - `proxmox-vm`: Creates virtual machines on Proxmox via template cloning
    - `proxmox-pool`: Creates Proxmox resource pools
-   - `dns`: Manages DNS A records on BIND9 servers
+   - `dns`: Manages DNS A records on BIND9 servers (supports both normal and wildcard records)
    - `naming`: Wrapper around the homelab provider for standardized resource naming
    - These are basic building blocks with no Terragrunt-specific logic
 
@@ -78,17 +78,17 @@ The `examples/` directory contains working examples for local testing:
   - `proxmox-lxc`: LXC container deployment example
   - `proxmox-vm`: Virtual machine deployment example
   - `proxmox-pool`: Resource pool creation example
-  - `dns`: DNS record management example
-  - `dns-wildcard`: Wildcard DNS record example (creates `*.{env}-{app}` records)
+  - `dns`: DNS record management example (normal records only)
+  - `dns-wildcard`: Wildcard DNS record example (wildcard records only)
   - `naming`: Naming convention example
-- `examples/terragrunt/stacks/`: Complete stack examples using GitHub units
+- `examples/terragrunt/stacks/`: Complete stack examples using local units
   - `homelab-proxmox-pool`: Proxmox resource pool only
   - `homelab-proxmox-container`: LXC container + pool + DNS
   - `homelab-proxmox-vm`: Virtual machine + pool + DNS (requires SSH key configuration)
   - `homelab-wildcard-dns`: LXC container with both regular and wildcard DNS records
-  - **Note**: Stack examples reference units from GitHub (`../../../../units/` with `ref=main`)
+  - **Note**: Stack examples reference units via relative paths (`../../../../units/`) for local testing
 - Unit examples use relative paths to modules (e.g., `../../../.././/modules/proxmox-lxc`)
-- Stack examples use local units with relative paths for easier testing
+- Stack examples use relative paths to units (e.g., `../../../../units/dns`) for easier testing
 
 **Direct OpenTofu Examples** (`examples/tofu/`):
 - Direct module usage without Terragrunt wrappers
@@ -199,6 +199,7 @@ mise run tofu:init        # Interactive menu
 mise run tofu:init naming # Specific target
 mise run tofu:plan
 mise run tofu:apply
+mise run tofu:output
 mise run tofu:destroy
 ```
 
@@ -303,7 +304,7 @@ Examples:
 - `units/proxmox-lxc/terragrunt.hcl`: LXC container unit
 - `units/proxmox-vm/terragrunt.hcl`: Virtual machine unit (requires `ssh_public_key_path`)
 - `units/proxmox-pool/terragrunt.hcl`: Resource pool unit
-- `units/dns/terragrunt.hcl`: DNS record unit (supports both regular and wildcard DNS records via `wildcard` parameter)
+- `units/dns/terragrunt.hcl`: DNS record unit (supports both regular and wildcard DNS records via `record_types` parameter)
 - `units/naming/terragrunt.hcl`: Naming convention unit
 
 ### Adding New Stacks
@@ -319,10 +320,15 @@ Examples:
    - Direct references to modules via relative paths
    - Concrete values in `locals` block
 
-Examples:
-- `stacks/homelab-proxmox-pool/`: Proxmox resource pool only
+Examples in `stacks/` (production stacks using Git URLs):
 - `stacks/homelab-proxmox-container/`: LXC container stack with pool and DNS
 - `stacks/homelab-proxmox-vm/`: Virtual machine stack with pool and DNS (requires SSH key path configuration)
+
+Examples in `examples/terragrunt/stacks/` (local testing stacks):
+- `examples/terragrunt/stacks/homelab-proxmox-pool/`: Proxmox resource pool only
+- `examples/terragrunt/stacks/homelab-proxmox-container/`: LXC container with pool and DNS
+- `examples/terragrunt/stacks/homelab-proxmox-vm/`: VM with pool and DNS
+- `examples/terragrunt/stacks/homelab-wildcard-dns/`: LXC container with both normal and wildcard DNS records
 
 ### Working with Dependencies
 
@@ -567,21 +573,21 @@ unit "proxmox_vm" {
 
 ### Wildcard DNS Records
 
-The DNS module supports creating wildcard DNS records that match all subdomains under a specific pattern.
+The DNS module supports creating both normal and wildcard DNS records simultaneously through the `record_types` parameter.
 
-**Regular DNS Record** (default):
-- Creates: `{env}-{app}.home.sflab.io`
-- Example: `dev-web.home.sflab.io`
+**Record Types**:
+- **Normal Record** (`record_types.normal = true`): Creates `{env}-{app}.home.sflab.io`
+  - Example: `dev-web.home.sflab.io`
+- **Wildcard Record** (`record_types.wildcard = true`): Creates `*.{env}-{app}.home.sflab.io`
+  - Example: `*.dev-web.home.sflab.io`
+  - Matches: `anything.dev-web.home.sflab.io`, `api.dev-web.home.sflab.io`, etc.
 
-**Wildcard DNS Record** (when `wildcard = true`):
-- Creates: `*.{env}-{app}.home.sflab.io`
-- Example: `*.dev-web.home.sflab.io`
-- Matches: `anything.dev-web.home.sflab.io`, `api.dev-web.home.sflab.io`, etc.
+**Default Behavior**: By default, only normal records are created (`normal = true`, `wildcard = false`).
 
-**Usage Example:**
+**Usage Examples:**
 
 ```hcl
-# In a stack or unit
+# Create only wildcard record
 unit "dns_wildcard" {
   source = "../../../../units/dns"
   path   = "dns-wildcard"
@@ -590,8 +596,28 @@ unit "dns_wildcard" {
     env          = "dev"
     app          = "web"
     zone         = "home.sflab.io."
-    wildcard     = true  # Creates *.dev-web.home.sflab.io
-    compute_path = "../proxmox-lxc"  # Get IP from LXC container
+    record_types = {
+      normal   = false
+      wildcard = true
+    }
+    compute_path = "../proxmox-lxc"
+  }
+}
+
+# Create both normal AND wildcard records
+unit "dns_both" {
+  source = "../../../../units/dns"
+  path   = "dns-both"
+
+  values = {
+    env          = "dev"
+    app          = "web"
+    zone         = "home.sflab.io."
+    record_types = {
+      normal   = true   # Creates dev-web.home.sflab.io
+      wildcard = true   # Creates *.dev-web.home.sflab.io
+    }
+    compute_path = "../proxmox-lxc"
   }
 }
 ```
@@ -719,9 +745,12 @@ Current modules support:
     - `addresses` (list(string)): List of IPv4 addresses
   - Optional inputs:
     - `ttl` (number, default: 300)
-    - `wildcard` (bool, default: false) - Creates wildcard DNS record `*.{env}-{app}` instead of `{env}-{app}`
-  - DNS record name: Automatically generated as `<env>-<app>` via naming module (or `*.<env>-<app>` if wildcard is true)
-  - Outputs: `fqdn` (fully qualified domain name), `addresses` (IP addresses)
+    - `record_types` (object, default: `{normal = true, wildcard = false}`) - Controls which DNS record types to create
+      - `normal` (bool): Creates standard `{env}-{app}` record
+      - `wildcard` (bool): Creates wildcard `*.{env}-{app}` record
+      - Both can be true simultaneously to create both record types
+  - DNS record name: Automatically generated as `<env>-<app>` via naming module (or `*.<env>-<app>` for wildcard records)
+  - Outputs: `fqdn` (normal record FQDN, null if not created), `fqdn_wildcard` (wildcard record FQDN, null if not created), `addresses` (IP addresses)
   - DNS Server Configuration (in units):
     - Server: `192.168.1.13:5353` (Port 5353, not default 53!)
     - TSIG Key: `ddnskey` (fully-qualified with trailing dot)
@@ -733,7 +762,7 @@ Current modules support:
 
 - **Resource Naming** (`modules/naming`): Wrapper around the homelab provider for standardized naming conventions
   - Data Source: `homelab_naming` (from external homelab provider)
-  - Provider: `registry.terraform.io/abes140377/homelab` (version 0.1.0)
+  - Provider: `registry.terraform.io/abes140377/homelab` (version >= 0.2.0)
   - Required inputs:
     - `env` (string): Environment name (e.g., "dev", "staging", "prod")
     - `app` (string): Application name (e.g., "web", "db", "api")

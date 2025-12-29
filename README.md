@@ -1,1 +1,0 @@
-# terragrunt-infrastructure-catalog-homelab
